@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bozkurt Fleet OS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" crossorigin="anonymous"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#0f1117;--sidebar:#161b27;--card:#1c2233;--card2:#212840;--border:#2a3150;--text:#e8eaf6;--muted:#7b85a3;--accent:#4f7cff;--green:#22c55e;--red:#ef4444;--orange:#f59e0b;--purple:#a855f7;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;font-size:14px;}
+.sidebar{width:210px;background:var(--sidebar);display:flex;flex-direction:column;border-right:1px solid var(--border);flex-shrink:0;}
+.sidebar-logo{padding:18px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#4f7cff,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-text{font-size:12px;font-weight:700;line-height:1.2;}
+.logo-text span{color:var(--muted);font-weight:400;font-size:10px;display:block;}
+.nav{flex:1;padding:8px;overflow-y:auto;}
+.nav::-webkit-scrollbar{width:4px;}.nav::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.ns{font-size:10px;color:var(--muted);font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:10px 8px 3px;}
+.ni{display:flex;align-items:center;gap:9px;padding:7px 9px;border-radius:7px;cursor:pointer;color:var(--muted);font-size:12px;transition:all .15s;margin-bottom:1px;}
+.ni:hover{background:var(--card);color:var(--text);}
+.ni.active{background:rgba(79,124,255,.15);color:#4f7cff;}
+.ni svg{width:14px;height:14px;flex-shrink:0;}
+.sidebar-user{padding:10px 12px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.ua{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#4f7cff,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;}
+.ui{font-size:11px;font-weight:600;}
+.ui span{display:block;color:var(--muted);font-weight:400;font-size:10px;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar h1{font-size:18px;font-weight:700;}
+.topbar p{color:var(--muted);font-size:11px;margin-top:1px;}
+.tbr{display:flex;gap:7px;align-items:center;}
+.btn-date{background:var(--card);border:1px solid var(--border);color:var(--text);padding:5px 11px;border-radius:7px;font-size:11px;cursor:pointer;}
+.btn-export{background:var(--accent);border:none;color:#fff;padding:5px 13px;border-radius:7px;font-size:11px;cursor:pointer;font-weight:600;}
+.btn-import{background:rgba(34,197,94,.12);border:1px solid var(--green);color:var(--green);padding:5px 13px;border-radius:7px;font-size:11px;cursor:pointer;font-weight:600;}
+.page{display:none;flex:1;overflow-y:auto;padding:18px 20px;}
+.page::-webkit-scrollbar{width:5px;}.page::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.page.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:16px;margin-bottom:12px;}
+.ct{font-size:13px;font-weight:600;margin-bottom:12px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px;}
+.sl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:3px;}
+.sv{font-size:19px;font-weight:700;margin-bottom:2px;}
+.ssi{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:8px;}
+.sch{font-size:11px;color:var(--green);}
+.sch.d{color:var(--red);}
+table{width:100%;border-collapse:collapse;}
+th{font-size:11px;color:var(--muted);font-weight:500;text-align:left;padding:5px 7px;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{font-size:12px;padding:7px 7px;border-bottom:1px solid rgba(42,49,80,.35);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.015);}
+.tg{color:var(--green);font-weight:600;}
+.tr{color:var(--red);font-weight:600;}
+.ta{color:var(--accent);}
+.tm{color:var(--muted);}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;}
+.bg{background:rgba(34,197,94,.15);color:var(--green);}
+.br{background:rgba(239,68,68,.15);color:var(--red);}
+.bo{background:rgba(245,158,11,.15);color:var(--orange);}
+.bb{background:rgba(79,124,255,.15);color:var(--accent);}
+.bp{background:rgba(168,85,247,.15);color:var(--purple);}
+.cf{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.cf:last-child{border-bottom:none;}
+.srow{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.stitle{font-size:14px;font-weight:700;}
+.btn-p{background:var(--accent);border:none;color:#fff;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;}
+.btn-p:hover{opacity:.85;}
+.os-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(42,49,80,.25);font-size:12px;}
+.os-row:last-child{border-bottom:none;}
+.os-row.tot{font-weight:700;border-top:1px solid var(--border);margin-top:3px;padding-top:7px;}
+.os-sec{font-size:10px;font-weight:600;color:var(--accent);padding:8px 0 3px;text-transform:uppercase;letter-spacing:.06em;}
+.toll-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(42,49,80,.25);font-size:11px;}
+.toll-item:last-child{border-bottom:none;}
+.dw-scroll{max-height:200px;overflow-y:auto;}
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;}
+.upload-area:hover{border-color:var(--accent);background:rgba(79,124,255,.03);}
+canvas{max-height:180px;}
+.donut-wrap{position:relative;width:110px;height:110px;flex-shrink:0;}
+.donut-lbl{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.leg-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;}
+.leg-l{display:flex;align-items:center;gap:5px;}
+.leg-d{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+/* PDF IMPORT OVERLAY */
+.pdf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;}
+.pdf-overlay.open{display:flex;}
+.pdf-modal{background:var(--sidebar);border:1px solid var(--border);border-radius:14px;padding:24px;width:580px;max-height:80vh;overflow-y:auto;}
+.pdf-modal::-webkit-scrollbar{width:4px;}.pdf-modal::-webkit-scrollbar-thumb{background:var(--border);}
+.pdf-modal-title{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.pdf-modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;}
+.pdf-close{background:none;border:1px solid var(--border);color:var(--muted);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:14px;}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--accent);background:rgba(79,124,255,.04);}
+.prog-box{display:none;background:var(--card2);border-radius:10px;padding:14px;margin-bottom:14px;}
+.prog-step{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:3px 0;}
+.step-dot{width:16px;height:16px;border-radius:50%;background:var(--card);border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:8px;}
+.step-dot.done{background:var(--green);border-color:var(--green);color:#fff;}
+.step-dot.spin{background:var(--accent);border-color:var(--accent);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.res-preview{display:none;}
+.res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.res-card{background:var(--card);border:1px solid var(--border);border-radius:9px;padding:12px;}
+.res-label{font-size:10px;color:var(--muted);margin-bottom:3px;}
+.res-val{font-size:15px;font-weight:700;}
+.res-items{background:var(--card2);border-radius:9px;padding:12px;margin-bottom:14px;max-height:160px;overflow-y:auto;}
+.res-item{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(42,49,80,.3);font-size:12px;}
+.res-item:last-child{border-bottom:none;}
+.save-btn{background:var(--green);border:none;color:#fff;padding:11px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+.save-btn:hover{opacity:.9;}
+input[type=number]{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;outline:none;width:100%;}
+input[type=number]:focus{border-color:var(--accent);}
+select{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:13px;outline:none;width:100%;}
+.empty{text-align:center;padding:30px;color:var(--muted);font-size:12px;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">&#x1F43A;</div>
+    <div class="logo-text">Bozkurt Fleet OS<span>Graywolf Logistics LLC</span></div>
+  </div>
+  <nav class="nav">
+    <div class="ns">Overview</div>
+    <div class="ni active" onclick="sp('dashboard',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+    <div class="ns">Revenue</div>
+    <div class="ni" onclick="sp('loads',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>Loads</div>
+    <div class="ni" onclick="sp('settlements',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Settlements</div>
+    <div class="ni" onclick="sp('reimbursements',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Reimbursements</div>
+    <div class="ns">Expenses</div>
+    <div class="ni" onclick="sp('fuel',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4"/><circle cx="9" cy="19" r="1"/><circle cx="16" cy="19" r="1"/></svg>Fuel</div>
+    <div class="ni" onclick="sp('maintenance',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94z"/></svg>Maintenance</div>
+    <div class="ni" onclick="sp('tolls',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>Tolls &amp; Fees</div>
+    <div class="ni" onclick="sp('deductions',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>Deductions</div>
+    <div class="ni" onclick="sp('fixedcosts',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Fixed Costs</div>
+    <div class="ns">Business</div>
+    <div class="ni" onclick="sp('assets',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Assets</div>
+    <div class="ni" onclick="sp('loans',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Loans</div>
+    <div class="ni" onclick="sp('operating',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Operating Statement</div>
+    <div class="ni" onclick="sp('documents',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Documents</div>
+    <div class="ni" onclick="sp('reports',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Reports</div>
+    <div class="ni" onclick="sp('tax',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>Tax Estimator</div>
+  </nav>
+    <div class="ns">Fleet Intelligence</div>
+    <div class="ni" onclick="sp('health',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Truck Health</div>
+    <div class="ni" onclick="sp('cashflow',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Cash Flow</div>
+    <div class="ni" onclick="sp('scorecard',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Scorecard</div>
+    <div class="ni" onclick="sp('loanCenter',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Loan Center</div>
+    <div class="ni" onclick="sp('cards',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Credit Cards</div>
+    <div class="ns">Business Tools</div>
+    <div class="ni" onclick="sp('vault',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>Document Vault</div>
+    <div class="ni" onclick="sp('assetreg',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>Asset Register</div>
+    <div class="ni" onclick="sp('accountant',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Accountant Pkg</div>
+    <div class="ni" onclick="sp('aiadvisor',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>AI Advisor</div>
+  <div class="sidebar-user">
+    <div class="ua">AB</div>
+    <div class="ui">Ali Bozkurt<span>Admin &middot; Unit 634033</span></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div><h1 id="ptitle">Dashboard</h1><p id="psub">Overview of your fleet and business</p></div>
+    <div class="tbr">
+      <button class="btn-date" id="btn-week">&#128197; No data yet</button>
+      <button class="btn-import" onclick="openPDF()">&#128196; Import PDF</button>
+      <button class="btn-export" onclick="exportJSON()">&#8595; Export</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="g4">
+      <div class="sc"><div class="ssi" style="background:rgba(79,124,255,.15)">&#x1F4BC;</div><div class="sl">Total Revenue</div><div class="sv tg" id="d-rev">$0.00</div><div class="sch" id="d-rev-sub">Import PDF to start</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(239,68,68,.15)">&#x1F4CB;</div><div class="sl">Total Deductions</div><div class="sv tr" id="d-ded">$0.00</div><div class="sch d" id="d-ded-sub">From settlement</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(34,197,94,.15)">&#x1F4C8;</div><div class="sl">Net to Owner</div><div class="sv" id="d-net">$0.00</div><div class="sch" id="d-net-sub">Direct deposit</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(168,85,247,.15)">&#x1F6E3;&#xFE0F;</div><div class="sl">Miles Driven</div><div class="sv" id="d-miles">0</div><div class="sch" id="d-miles-sub">Import PDF</div></div>
+    </div>
+    <div class="g21">
+      <div class="card"><div class="ct">Weekly P&amp;L Overview</div><canvas id="profitChart"></canvas></div>
+      <div class="card"><div class="ct">Cash Flow &mdash; Last Settlement</div><div id="d-cashflow"><div class="empty">&#128196; Import PDF to see cash flow</div></div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">Recent Loads</div><div id="d-loads-table"><div class="empty">&#128666; No loads yet</div></div></div>
+      <div class="card"><div class="ct">Expense Breakdown</div><div id="d-donut-wrap"><div class="empty">&#128184; Import PDF to see breakdown</div></div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">Truck Summary</div><div id="d-truck"><div class="empty">&#128666; Import PDF to populate</div></div></div>
+      <div class="card"><div class="ct">Loans</div><div id="d-loans-dash"><div class="empty">&#127974; No loan data</div></div></div>
+    </div>
+  </div>
+
+  <!-- LOADS -->
+  <div id="page-loads" class="page">
+    <div class="g3" id="loads-stats">
+      <div class="sc"><div class="sl">Total Loads</div><div class="sv" id="ls-count">0</div></div>
+      <div class="sc"><div class="sl">Total Miles</div><div class="sv" id="ls-miles">0</div></div>
+      <div class="sc"><div class="sl">Revenue/Mile</div><div class="sv" id="ls-rpm">$0.00</div></div>
+    </div>
+    <div class="card"><div class="srow"><div class="stitle">Load Details</div></div><div id="loads-table"><div class="empty">Import PDF to populate loads</div></div></div>
+    <div class="card"><div class="ct">Stop / Detention Details</div><div id="loads-stops"><div class="empty">No stop data yet</div></div></div>
+  </div>
+
+  <!-- SETTLEMENTS -->
+  <div id="page-settlements" class="page">
+    <div class="g4">
+      <div class="sc"><div class="sl">Gross Revenue</div><div class="sv tg" id="s-gross">$0.00</div></div>
+      <div class="sc"><div class="sl">Reimbursements</div><div class="sv tg" id="s-reimb">$0.00</div></div>
+      <div class="sc"><div class="sl">Deductions</div><div class="sv tr" id="s-ded">$0.00</div></div>
+      <div class="sc"><div class="sl">Net Paid</div><div class="sv" id="s-net">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">Settlement History</div><div id="settlements-table"><div class="empty">Import PDF to populate</div></div></div>
+    <div class="g2">
+      <div class="card"><div class="ct">Revenue Items</div><div id="s-rev-items"><div class="empty">No data</div></div></div>
+      <div class="card"><div class="ct">Reimbursement Items</div><div id="s-reimb-items"><div class="empty">No data</div></div></div>
+    </div>
+  </div>
+
+  <!-- REIMBURSEMENTS -->
+  <div id="page-reimbursements" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">This Period</div><div class="sv tg" id="r-period">$0.00</div></div>
+      <div class="sc"><div class="sl">Warranty Covered</div><div class="sv tg" id="r-warranty">$0.00</div></div>
+      <div class="sc"><div class="sl">Fuel Reimbursed</div><div class="sv tg" id="r-fuel">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">Reimbursement Log</div><div id="reimb-table"><div class="empty">Import PDF to populate</div></div></div>
+  </div>
+
+  <!-- FUEL -->
+  <div id="page-fuel" class="page">
+    <div class="g4">
+      <div class="sc"><div class="sl">Tractor Fuel (gross)</div><div class="sv tr" id="f-tractor">$0.00</div></div>
+      <div class="sc"><div class="sl">Reefer Fuel (gross)</div><div class="sv tr" id="f-reefer">$0.00</div></div>
+      <div class="sc"><div class="sl">Total Discounts</div><div class="sv tg" id="f-disc">$0.00</div></div>
+      <div class="sc"><div class="sl">Net Fuel Cost</div><div class="sv tr" id="f-net">$0.00</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">Tractor Fuel Transactions</div><div id="fuel-tractor"><div class="empty">Import PDF to populate</div></div></div>
+      <div class="card"><div class="ct">Reefer Fuel Transactions</div><div id="fuel-reefer"><div class="empty">Import PDF to populate</div></div></div>
+    </div>
+  </div>
+
+  <!-- MAINTENANCE -->
+  <div id="page-maintenance" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Total Repairs</div><div class="sv tr" id="m-total">$0.00</div></div>
+      <div class="sc"><div class="sl">Warranty Covered</div><div class="sv tg" id="m-warranty">$0.00</div></div>
+      <div class="sc"><div class="sl">Out of Pocket</div><div class="sv tr" id="m-oop">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">Repair Invoices</div><div id="maint-table"><div class="empty">Import PDF to populate</div></div></div>
+  </div>
+
+  <!-- TOLLS -->
+  <div id="page-tolls" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">EZ-Pass</div><div class="sv" id="t-ez">$0.00</div></div>
+      <div class="sc"><div class="sl">DriveWyze</div><div class="sv" id="t-dw">$0.00</div></div>
+      <div class="sc"><div class="sl">Total Tolls</div><div class="sv tr" id="t-total">$0.00</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">EZ-Pass Detail</div><div id="tolls-ez"><div class="empty">Import PDF to populate</div></div></div>
+      <div class="card"><div class="ct">DriveWyze Detail</div><div id="tolls-dw"><div class="empty">Import PDF to populate</div></div></div>
+    </div>
+  </div>
+
+  <!-- DEDUCTIONS -->
+  <div id="page-deductions" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Variable Costs</div><div class="sv tr" id="ded-var">$0.00</div></div>
+      <div class="sc"><div class="sl">Fixed Costs</div><div class="sv tr" id="ded-fix">$0.00</div></div>
+      <div class="sc"><div class="sl">Total Deductions</div><div class="sv tr" id="ded-total">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">All Deductions</div><div id="ded-table"><div class="empty">Import PDF to populate</div></div></div>
+  </div>
+
+  <!-- FIXED COSTS -->
+  <div id="page-fixedcosts" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Truck Payment</div><div class="sv tr" id="fc-truck">$0.00</div></div>
+      <div class="sc"><div class="sl">License &amp; Permits</div><div class="sv tr" id="fc-license">$0.00</div></div>
+      <div class="sc"><div class="sl">Total Fixed</div><div class="sv tr" id="fc-total">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">Fixed Cost Breakdown</div><div id="fc-table"><div class="empty">Import PDF to populate</div></div></div>
+  </div>
+
+  <!-- ASSETS -->
+  <div id="page-assets" class="page">
+    <div class="g2">
+      <div class="card"><div class="srow"><div class="stitle">Tractor</div><span class="badge bg">Active</span></div><div id="assets-tractor"><div class="empty">Import PDF to populate</div></div></div>
+      <div class="card"><div class="srow"><div class="stitle">APU / Trailer</div><span class="badge bb">Leased</span></div><div id="assets-apu"><div class="empty">Import PDF to populate</div></div></div>
+    </div>
+  </div>
+
+  <!-- LOANS -->
+  <div id="page-loans" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Total Balance</div><div class="sv tr" id="ln-total">$0.00</div></div>
+      <div class="sc"><div class="sl">Weekly Payments</div><div class="sv" id="ln-weekly">$0.00</div></div>
+      <div class="sc"><div class="sl">Active Loans</div><div class="sv" id="ln-count">0</div></div>
+    </div>
+    <div class="card"><div class="ct">Loan &amp; Obligation Tracker</div><div id="loans-table"><div class="empty">Import PDF to populate</div></div></div>
+  </div>
+
+  <!-- OPERATING STATEMENT -->
+  <div id="page-operating" class="page">
+    <div class="g4">
+      <div class="sc"><div class="sl">Total Revenue</div><div class="sv tg" id="op-rev">$0.00</div><div class="sch" id="op-rev-mi"></div></div>
+      <div class="sc"><div class="sl">Total Expenses</div><div class="sv tr" id="op-exp">$0.00</div><div class="sch d" id="op-exp-mi"></div></div>
+      <div class="sc"><div class="sl">Net Income</div><div class="sv" id="op-net">$0.00</div><div class="sch" id="op-net-mi"></div></div>
+      <div class="sc"><div class="sl">Weeks in Service</div><div class="sv" id="op-weeks">0</div></div>
+    </div>
+    <div class="g2">
+      <div class="card"><div class="ct">Revenue Detail</div><div id="op-rev-detail"><div class="empty">Import PDF to populate</div></div></div>
+      <div class="card"><div class="ct">Expense Detail</div><div id="op-exp-detail"><div class="empty">Import PDF to populate</div></div></div>
+    </div>
+    <div class="card"><div class="ct">YTD Summary</div><div id="op-ytd"><div class="empty">Import PDF to see YTD data</div></div></div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div id="page-documents" class="page">
+    <div class="card">
+      <div class="srow"><div class="stitle">2026 Document Archive</div><button class="btn-p" onclick="openPDF()">&#128196; Import PDF</button></div>
+      <div id="doc-archive"><div class="empty">&#128193; No documents yet. Import a PDF settlement to begin.</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">&#128196; Import Settlement PDF</div>
+      <div class="upload-area" onclick="openPDF()" ondragover="event.preventDefault()" ondrop="handleDocDrop(event)">
+        <div style="font-size:30px;margin-bottom:8px">&#128196;</div>
+        <div style="font-size:13px;color:var(--muted)">Drop your Prime Inc. settlement PDF here<br><strong style="color:var(--accent)">or click to browse</strong></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Auto-extracts: Revenue &bull; Fuel &bull; Deductions &bull; Loads &bull; Tolls &bull; Net Pay</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORTS -->
+  <div id="page-reports" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">YTD Revenue</div><div class="sv tg" id="rp-rev">$0.00</div><div class="sch" id="rp-rev-mi"></div></div>
+      <div class="sc"><div class="sl">YTD Expenses</div><div class="sv tr" id="rp-exp">$0.00</div></div>
+      <div class="sc"><div class="sl">YTD Net</div><div class="sv" id="rp-net">$0.00</div></div>
+    </div>
+    <div class="card"><div class="ct">YTD Performance</div><canvas id="ytdChart" style="max-height:200px"></canvas></div>
+    <div class="g2">
+      <div class="card"><div class="ct">Revenue YTD</div><div id="rp-rev-detail"><div class="empty">Import PDF to populate</div></div></div>
+      <div class="card"><div class="ct">Expense YTD</div><div id="rp-exp-detail"><div class="empty">Import PDF to populate</div></div></div>
+    </div>
+  </div>
+
+  <!-- TAX ESTIMATOR -->
+  <div id="page-tax" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">YTD Net Profit</div><div class="sv tg" id="tx-net">$0.00</div><div class="sch">Before tax deductions</div></div>
+      <div class="sc"><div class="sl">Est. Total Tax Owed</div><div class="sv tr" id="tx-total">&#8212;</div><div class="sch">SE + Federal Income</div></div>
+      <div class="sc"><div class="sl">Quarterly Payment</div><div class="sv" style="color:var(--orange)" id="tx-qtr">&#8212;</div><div class="sch">Every 3 months to IRS</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">&#x1F9EE; Tax Calculator &#8212; Single Member LLC (Schedule C)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+        <div><div class="sl" style="margin-bottom:4px">Annual Gross Revenue ($)</div><input id="ti-rev" type="number" value="0" oninput="calcTax()"></div>
+        <div><div class="sl" style="margin-bottom:4px">Annual Business Expenses ($)</div><input id="ti-exp" type="number" value="0" oninput="calcTax()"></div>
+        <div><div class="sl" style="margin-bottom:4px">Filing Status</div><select id="ti-status" oninput="calcTax()"><option value="single">Single</option><option value="mfj">Married Filing Jointly</option><option value="hoh">Head of Household</option></select></div>
+        <div><div class="sl" style="margin-bottom:4px">Other Income ($)</div><input id="ti-other" type="number" value="0" oninput="calcTax()"></div>
+        <div><div class="sl" style="margin-bottom:4px">SEP-IRA Contribution ($)</div><input id="ti-sep" type="number" value="0" oninput="calcTax()"></div>
+        <div><div class="sl" style="margin-bottom:4px">Health Insurance ($)</div><input id="ti-health" type="number" value="0" oninput="calcTax()"></div>
+      </div>
+      <button class="btn-p" onclick="calcTax()">&#x1F4CA; Calculate</button>
+    </div>
+    <div class="g2" id="tax-results" style="display:none">
+      <div class="card">
+        <div class="ct">&#x1F4CB; Breakdown</div>
+        <div class="os-sec">Self-Employment Tax</div>
+        <div class="os-row"><span>Net Profit</span><span id="r-np">&#8212;</span></div>
+        <div class="os-row"><span>SE Base (92.35%)</span><span id="r-seb">&#8212;</span></div>
+        <div class="os-row"><span>SE Tax (15.3%)</span><span class="tr" id="r-set">&#8212;</span></div>
+        <div class="os-row"><span>SE Deduction (50%)</span><span class="tg" id="r-sed">&#8212;</span></div>
+        <div class="os-sec">Federal Income Tax</div>
+        <div class="os-row"><span>AGI</span><span id="r-agi">&#8212;</span></div>
+        <div class="os-row"><span>Standard Deduction</span><span class="tg" id="r-std">&#8212;</span></div>
+        <div class="os-row"><span>Taxable Income</span><span id="r-taxable">&#8212;</span></div>
+        <div id="r-brackets"></div>
+        <div class="os-row tot"><span>Federal Tax</span><span class="tr" id="r-fed">&#8212;</span></div>
+        <div class="os-row tot" style="font-size:15px"><span>TOTAL TAX</span><span class="tr" id="r-tot">&#8212;</span></div>
+        <div class="os-row"><span>Effective Rate</span><span id="r-eff">&#8212;</span></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="ct">&#128197; Quarterly (1040-ES)</div>
+          <table><thead><tr><th>Quarter</th><th>Period</th><th>Due</th><th>Amount</th></tr></thead>
+          <tbody>
+            <tr><td>Q1</td><td>Jan&#8211;Mar</td><td style="color:var(--orange)">Apr 15</td><td class="tr" id="q1">&#8212;</td></tr>
+            <tr><td>Q2</td><td>Apr&#8211;May</td><td style="color:var(--orange)">Jun 16</td><td class="tr" id="q2">&#8212;</td></tr>
+            <tr><td>Q3</td><td>Jun&#8211;Aug</td><td style="color:var(--orange)">Sep 15</td><td class="tr" id="q3">&#8212;</td></tr>
+            <tr><td>Q4</td><td>Sep&#8211;Dec</td><td style="color:var(--orange)">Jan 15</td><td class="tr" id="q4">&#8212;</td></tr>
+          </tbody></table>
+        </div>
+        <div class="card">
+          <div class="ct">&#128176; Set Aside Weekly</div>
+          <div style="text-align:center;padding:12px 0">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Put aside every week for taxes:</div>
+            <div style="font-size:34px;font-weight:700;color:var(--orange)" id="r-weekly">&#8212;</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">&#x1F4A1; Tax Tips</div>
+          <div style="font-size:12px;line-height:1.9;color:var(--muted)">
+            <div>&#10003; <strong style="color:var(--green)">Per Diem</strong> $69/night &times; 200 nights = $13,800</div>
+            <div>&#10003; <strong style="color:var(--green)">SEP-IRA</strong> up to 25% net (max $69K)</div>
+            <div>&#10003; <strong style="color:var(--green)">Section 179</strong> full truck expensing</div>
+            <div>&#10003; <strong style="color:var(--green)">Phone/Internet</strong> business portion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRUCK HEALTH -->
+  <div id="page-health" class="page">
+    <div class="g4">
+      <div class="sc"><div class="ssi" style="background:rgba(34,197,94,.15)">🛢️</div><div class="sl">Oil Change</div><div class="sv tg" id="h-oil-remain">—</div><div class="sch" id="h-oil-sub">miles remaining</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(79,124,255,.15)">⚙️</div><div class="sl">Valve Lash</div><div class="sv" id="h-valve-remain">—</div><div class="sch" id="h-valve-sub">miles remaining</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(245,158,11,.15)">💧</div><div class="sl">Coolant Flush</div><div class="sv" id="h-coolant-remain">—</div><div class="sch" id="h-coolant-sub">days remaining</div></div>
+      <div class="sc"><div class="ssi" style="background:rgba(168,85,247,.15)">🔥</div><div class="sl">DPF Cleaning</div><div class="sv" id="h-dpf-remain">—</div><div class="sch" id="h-dpf-sub">miles remaining</div></div>
+    </div>
+    <div class="g4">
+      <div class="sc"><div class="sl">Transmission</div><div class="sv" id="h-trans-remain">—</div><div class="sch" id="h-trans-sub">miles remaining</div></div>
+      <div class="sc"><div class="sl">APU Hours</div><div class="sv" id="h-apu">7,569 hrs</div><div class="sch">Running total</div></div>
+      <div class="sc"><div class="sl">Tire Age</div><div class="sv" id="h-tires">—</div><div class="sch">months avg</div></div>
+      <div class="sc"><div class="sl">Battery Age</div><div class="sv" id="h-battery">—</div><div class="sch">months</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ct">🔧 Maintenance Schedule — Unit 634033</div>
+        <div id="health-schedule"></div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-p" onclick="showHealthSetup()">⚙️ Update Odometer</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">📋 Setup — Current Odometer & Last Service</div>
+        <div id="health-setup-form">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div><div class="sl" style="margin-bottom:3px">Current Odometer (mi)</div><input type="number" id="hs-odo" placeholder="377445" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Last Oil Change (mi)</div><input type="number" id="hs-oil" placeholder="370000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Last Valve Lash (mi)</div><input type="number" id="hs-valve" placeholder="300000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Last DPF Clean (mi)</div><input type="number" id="hs-dpf" placeholder="350000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Last Trans Service (mi)</div><input type="number" id="hs-trans" placeholder="320000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Coolant Last Date</div><input type="date" id="hs-coolant" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Tire Install Date</div><input type="date" id="hs-tires" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+            <div><div class="sl" style="margin-bottom:3px">Battery Install Date</div><input type="date" id="hs-battery" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          </div>
+          <button class="btn-p" onclick="calcHealth()">📊 Calculate Schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CASH FLOW -->
+  <div id="page-cashflow" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Bank Balance</div><div class="sv tg" id="cf-bank">$0.00</div><div class="sch">Current</div></div>
+      <div class="sc"><div class="sl">Next 30 Days Revenue</div><div class="sv tg" id="cf-rev30">$0.00</div><div class="sch">Expected</div></div>
+      <div class="sc"><div class="sl">Net Cash Forecast</div><div class="sv" id="cf-net30">$0.00</div><div class="sch">After all expenses</div></div>
+    </div>
+    <div class="g2">
+      <div class="card">
+        <div class="ct">💰 Cash Flow Setup</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+          <div><div class="sl" style="margin-bottom:3px">Current Bank Balance ($)</div><input type="number" id="cfs-bank" placeholder="0" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Expected Weekly Revenue ($)</div><input type="number" id="cfs-wrev" placeholder="6000" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Weekly Truck Payment ($)</div><input type="number" id="cfs-truck" placeholder="1145" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Weekly Fuel Est. ($)</div><input type="number" id="cfs-fuel" placeholder="1800" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Monthly Insurance ($)</div><input type="number" id="cfs-ins" placeholder="0" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Monthly Warranty ($)</div><input type="number" id="cfs-warr" placeholder="333" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Other Weekly Costs ($)</div><input type="number" id="cfs-other" placeholder="500" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+          <div><div class="sl" style="margin-bottom:3px">Tax Reserve % of Net</div><input type="number" id="cfs-tax" placeholder="25" oninput="calcCashFlow()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        </div>
+        <button class="btn-p" onclick="calcCashFlow()">📊 Update Forecast</button>
+      </div>
+      <div class="card">
+        <div class="ct">📅 30-Day Forecast</div>
+        <div id="cf-forecast"><div class="empty">Fill in the setup to see forecast</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="ct">📈 Weekly Cash Flow Timeline</div>
+      <div id="cf-timeline"></div>
+    </div>
+  </div>
+
+  <!-- SCORECARD -->
+  <div id="page-scorecard" class="page">
+    <div class="g2" style="margin-bottom:14px">
+      <div class="card" style="text-align:center;padding:28px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">Fleet Score</div>
+        <div style="font-size:72px;font-weight:700;line-height:1" id="sc-score">—</div>
+        <div style="font-size:14px;color:var(--muted);margin-top:6px" id="sc-grade">Import PDF to calculate</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">out of 100</div>
+      </div>
+      <div class="card">
+        <div class="ct">📊 This Week's KPIs</div>
+        <div id="sc-kpis"><div class="empty">Import PDF to calculate</div></div>
+      </div>
+    </div>
+    <div class="card"><div class="ct">📈 Score History</div><div id="sc-history"><div class="empty">Score history will appear here</div></div></div>
+  </div>
+
+  <!-- LOAN CENTER -->
+  <div id="page-loanCenter" class="page">
+    <div class="g4">
+      <div class="sc"><div class="sl">Total Debt</div><div class="sv tr" id="lc-total">$0.00</div></div>
+      <div class="sc"><div class="sl">Weekly Payments</div><div class="sv" id="lc-weekly">$0.00</div></div>
+      <div class="sc"><div class="sl">Monthly Payments</div><div class="sv" id="lc-monthly">$0.00</div></div>
+      <div class="sc"><div class="sl">Est. Payoff</div><div class="sv" style="color:var(--orange)" id="lc-payoff">—</div></div>
+    </div>
+    <div class="card">
+      <div class="srow"><div class="stitle">Loan Tracker</div><button class="btn-p" onclick="addLoan()">+ Add Loan</button></div>
+      <div id="lc-table"><div class="empty">No loans added yet</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">➕ Add / Edit Loan</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+        <div><div class="sl" style="margin-bottom:3px">Loan Name</div><input type="text" id="ln-name" placeholder="Truck Loan" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Lender</div><input type="text" id="ln-lender" placeholder="Prime / Bank / Personal" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Original Amount ($)</div><input type="number" id="ln-orig" placeholder="60000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Current Balance ($)</div><input type="number" id="ln-bal" placeholder="45000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Payment Amount ($)</div><input type="number" id="ln-pay" placeholder="1145" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Frequency</div><select id="ln-freq" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"><option>Weekly</option><option>Monthly</option><option>Bi-Weekly</option></select></div>
+        <div><div class="sl" style="margin-bottom:3px">Interest Rate %</div><input type="number" id="ln-rate" placeholder="0" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Next Due Date</div><input type="date" id="ln-due" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+      </div>
+      <button class="btn-p" onclick="saveLoan()">💾 Save Loan</button>
+    </div>
+  </div>
+
+  <!-- CREDIT CARDS -->
+  <div id="page-cards" class="page">
+    <div class="g4">
+      <div class="sc"><div class="sl">Total Card Balance</div><div class="sv tr" id="cc-total">$0.00</div></div>
+      <div class="sc"><div class="sl">Total Credit Limit</div><div class="sv" id="cc-limit">$0.00</div></div>
+      <div class="sc"><div class="sl">Utilization</div><div class="sv" id="cc-util">0%</div></div>
+      <div class="sc"><div class="sl">Min. Monthly Pay</div><div class="sv tr" id="cc-minpay">$0.00</div></div>
+    </div>
+    <div class="card">
+      <div class="srow"><div class="stitle">Credit Cards & Personal Loans</div><button class="btn-p" onclick="addCard()">+ Add Card</button></div>
+      <div id="cc-table"><div class="empty">No cards added yet — add your personal credit cards used for business</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">➕ Add Card / Personal Loan</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+        <div><div class="sl" style="margin-bottom:3px">Card / Loan Name</div><input type="text" id="cc-name" placeholder="Chase Sapphire / Amazon Card" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Type</div><select id="cc-type" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"><option>Credit Card</option><option>Personal Loan</option><option>Store Card</option><option>HELOC</option></select></div>
+        <div><div class="sl" style="margin-bottom:3px">Current Balance ($)</div><input type="number" id="cc-bal" placeholder="0" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Credit Limit ($)</div><input type="number" id="cc-lim" placeholder="5000" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">APR %</div><input type="number" id="cc-apr" placeholder="24.99" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Min Payment ($)</div><input type="number" id="cc-minp" placeholder="35" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Due Date (day of month)</div><input type="number" id="cc-dueday" placeholder="15" min="1" max="31" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Used For</div><input type="text" id="cc-use" placeholder="Truck parts, Amazon, Fuel" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+      </div>
+      <button class="btn-p" onclick="saveCard()">💾 Save Card</button>
+    </div>
+    <div class="card">
+      <div class="ct">🧾 Recent Business Purchases on Personal Cards</div>
+      <div class="srow" style="margin-bottom:10px"><div></div><button class="btn-p" onclick="addCardPurchase()">+ Add Purchase</button></div>
+      <div id="cc-purchases"><div class="empty">Track business purchases made on personal cards — tax deductible!</div></div>
+    </div>
+  </div>
+
+  <!-- DOCUMENT VAULT -->
+  <div id="page-vault" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Total Documents</div><div class="sv" id="vlt-count">0</div></div>
+      <div class="sc"><div class="sl">Categories</div><div class="sv">6</div></div>
+      <div class="sc"><div class="sl">Last Updated</div><div class="sv tm" id="vlt-updated">—</div></div>
+    </div>
+    <div class="card">
+      <div class="srow"><div class="stitle">🗄️ Document Vault</div><button class="btn-p" onclick="addVaultDoc()">+ Add Document</button></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button onclick="filterVault('all')" id="vf-all" class="btn-p" style="font-size:11px;padding:5px 12px">All</button>
+        <button onclick="filterVault('amazon')" id="vf-amazon" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Amazon</button>
+        <button onclick="filterVault('prime')" id="vf-prime" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Prime Inc</button>
+        <button onclick="filterVault('tax')" id="vf-tax" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Tax / IRS</button>
+        <button onclick="filterVault('warranty')" id="vf-warranty" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Warranty</button>
+        <button onclick="filterVault('truck')" id="vf-truck" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Truck</button>
+        <button onclick="filterVault('personal')" id="vf-personal" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:7px;font-size:11px;cursor:pointer">Personal</button>
+      </div>
+      <input type="text" id="vlt-search" placeholder="🔍 Search documents..." oninput="renderVault()" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:13px;width:100%;outline:none;margin-bottom:14px">
+      <div id="vlt-list"><div class="empty">No documents yet. Add your Amazon receipts, Prime docs, warranty papers, tax docs...</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">➕ Add Document</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
+        <div><div class="sl" style="margin-bottom:3px">Document Name</div><input type="text" id="vd-name" placeholder="Amazon Invoice #123" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Category</div><select id="vd-cat" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"><option value="amazon">Amazon</option><option value="prime">Prime Inc</option><option value="tax">Tax / IRS</option><option value="warranty">Warranty</option><option value="truck">Truck</option><option value="personal">Personal</option></select></div>
+        <div><div class="sl" style="margin-bottom:3px">Date</div><input type="date" id="vd-date" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Amount ($)</div><input type="number" id="vd-amt" placeholder="0" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Tax Deductible?</div><select id="vd-tax" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"><option value="yes">Yes</option><option value="no">No</option><option value="partial">Partial</option></select></div>
+        <div><div class="sl" style="margin-bottom:3px">Notes</div><input type="text" id="vd-notes" placeholder="Brief description" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+      </div>
+      <button class="btn-p" onclick="saveVaultDoc()">💾 Save Document</button>
+    </div>
+  </div>
+
+  <!-- ASSET REGISTER -->
+  <div id="page-assetreg" class="page">
+    <div class="g3">
+      <div class="sc"><div class="sl">Total Assets</div><div class="sv" id="ar-count">0</div></div>
+      <div class="sc"><div class="sl">Total Value</div><div class="sv tg" id="ar-value">$0.00</div></div>
+      <div class="sc"><div class="sl">Tax Deductible (Sec 179)</div><div class="sv tg" id="ar-deduct">$0.00</div></div>
+    </div>
+    <div class="card">
+      <div class="srow"><div class="stitle">📦 Business Asset Register</div><button class="btn-p" onclick="addAsset()">+ Add Asset</button></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Track all business assets including truck equipment, electronics, tools. Everything you bought for the business goes here for tax purposes.</div>
+      <div id="ar-table"><div class="empty">No assets yet. Add your TV, fridge, cameras, Starlink, tools, etc.</div></div>
+    </div>
+    <div class="card">
+      <div class="ct">➕ Add Asset</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px">
+        <div><div class="sl" style="margin-bottom:3px">Asset Name</div><input type="text" id="as-name" placeholder="65in TV / Starlink / Fridge" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Category</div><select id="as-cat" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"><option>Electronics</option><option>Appliance</option><option>Safety/Security</option><option>Communication</option><option>Truck Equipment</option><option>Tools</option><option>Other</option></select></div>
+        <div><div class="sl" style="margin-bottom:3px">Purchase Date</div><input type="date" id="as-date" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Cost ($)</div><input type="number" id="as-cost" placeholder="0" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Purchased From</div><input type="text" id="as-from" placeholder="Amazon / Walmart / eBay" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Business Use %</div><input type="number" id="as-biz" placeholder="100" min="0" max="100" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Warranty Until</div><input type="date" id="as-warr" style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+        <div><div class="sl" style="margin-bottom:3px">Notes</div><input type="text" id="as-notes" placeholder="Serial number, location, etc." style="background:var(--card2);border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:7px;font-size:12px;width:100%;outline:none"></div>
+      </div>
+      <button class="btn-p" onclick="saveAsset()">💾 Save Asset</button>
+    </div>
+  </div>
+
+  <!-- ACCOUNTANT PACKAGE -->
+  <div id="page-accountant" class="page">
+    <div class="card">
+      <div class="srow"><div class="stitle">📦 2026 Accountant Package</div><button class="btn-p" onclick="generatePackage()">⬇ Generate Package</button></div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px">One-click export of everything your accountant needs for 2026 taxes. Includes P&amp;L, deductions, asset list, loan summary, and card purchases.</div>
+      <div class="g3">
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">📊 Income & P&L</div>
+          <div class="os-row"><span>Total Gross Revenue</span><span class="tg" id="ap-rev">$0.00</span></div>
+          <div class="os-row"><span>Total Deductions</span><span class="tr" id="ap-ded">$0.00</span></div>
+          <div class="os-row"><span>Net Income</span><span id="ap-net">$0.00</span></div>
+          <div class="os-row"><span>Settlements Count</span><span id="ap-scount">0</span></div>
+        </div>
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🏦 Loans & Debt</div>
+          <div id="ap-loans"><div class="tm" style="font-size:11px">No loan data</div></div>
+        </div>
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">💳 Personal Cards Used</div>
+          <div id="ap-cards"><div class="tm" style="font-size:11px">No card data</div></div>
+        </div>
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">📦 Assets (Sec 179)</div>
+          <div id="ap-assets"><div class="tm" style="font-size:11px">No assets logged</div></div>
+        </div>
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">⛽ Fuel Summary</div>
+          <div id="ap-fuel"><div class="tm" style="font-size:11px">No fuel data</div></div>
+        </div>
+        <div style="background:var(--card2);border-radius:9px;padding:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px">🔧 Maintenance</div>
+          <div id="ap-maint"><div class="tm" style="font-size:11px">No maintenance data</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI ADVISOR -->
+  <div id="page-aiadvisor" class="page">
+    <div class="card">
+      <div class="ct">🤖 AI Business Advisor — Graywolf Logistics LLC</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Ask anything about your business. AI analyzes your actual settlement data to give specific answers.</div>
+      <div id="ai-messages" style="background:var(--card2);border-radius:10px;padding:14px;min-height:200px;max-height:380px;overflow-y:auto;margin-bottom:12px;font-size:13px;line-height:1.7"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button onclick="aiQuick('Why did my profit drop this week?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Why did profit drop?</button>
+        <button onclick="aiQuick('How can I reduce my fuel costs?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Reduce fuel costs?</button>
+        <button onclick="aiQuick('What are my biggest expenses?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Biggest expenses?</button>
+        <button onclick="aiQuick('Am I on track for my income goals?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Income goals?</button>
+        <button onclick="aiQuick('What should I do before tax season?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Tax season prep?</button>
+        <button onclick="aiQuick('How is my debt payoff progress?')" style="background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:5px 11px;border-radius:20px;font-size:11px;cursor:pointer">Debt payoff?</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="ai-input" placeholder="Ask anything about your business..." onkeydown="if(event.key==='Enter')sendAI()" style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-size:13px;outline:none">
+        <button class="btn-p" onclick="sendAI()">Send →</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- UNIVERSAL AI IMPORT OVERLAY -->
+<div class="pdf-overlay" id="pdf-overlay">
+  <div class="pdf-modal" style="width:640px">
+    <div class="pdf-modal-title">
+      &#x1F916; Universal AI Import
+      <button class="pdf-close" onclick="closePDF()">&#10005;</button>
+    </div>
+    <div class="pdf-modal-sub">Drop <strong>any document</strong> — Paycheck, Fuel receipt, Invoice, Amazon order — AI identifies it and fills the right modules automatically</div>
+    
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('pdf-file-input').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)" style="margin-bottom:12px">
+      <div style="font-size:38px;margin-bottom:10px">&#128196;</div>
+      <div style="font-size:14px;font-weight:600;margin-bottom:6px">Drop any document here</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px">
+        <span style="background:rgba(79,124,255,.15);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:11px">&#x1F4B0; Paycheck/Settlement</span>
+        <span style="background:rgba(34,197,94,.15);color:var(--green);padding:3px 10px;border-radius:20px;font-size:11px">&#x26FD; Fuel Receipt</span>
+        <span style="background:rgba(245,158,11,.15);color:var(--orange);padding:3px 10px;border-radius:20px;font-size:11px">&#x1F527; Repair Invoice</span>
+        <span style="background:rgba(168,85,247,.15);color:var(--purple);padding:3px 10px;border-radius:20px;font-size:11px">&#x1F6D2; Store Receipt</span>
+        <span style="background:rgba(239,68,68,.15);color:var(--red);padding:3px 10px;border-radius:20px;font-size:11px">&#x1F4E6; Amazon Order</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted)">or <strong style="color:var(--accent)">click to browse</strong> &middot; PDF, image or text</div>
+    </div>
+    <input type="file" id="pdf-file-input" accept=".pdf,.jpg,.jpeg,.png,.txt" style="display:none" onchange="handleFile(this.files[0])">
+    
+    <div class="prog-box" id="prog-box">
+      <div style="font-size:12px;font-weight:600;margin-bottom:10px">&#x1F916; AI Analyzing Document...</div>
+      <div id="prog-steps"></div>
+    </div>
+    
+    <div class="res-preview" id="res-preview">
+      <!-- Doc type badge -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:10px;background:var(--card2);border-radius:9px">
+        <div style="font-size:24px" id="pr-icon">&#128196;</div>
+        <div>
+          <div style="font-weight:700;font-size:14px" id="pr-doctype">Document Type</div>
+          <div style="font-size:11px;color:var(--muted)" id="pr-routing">Will be saved to...</div>
+        </div>
+        <div style="margin-left:auto;font-size:20px;font-weight:700" id="pr-amount"></div>
+      </div>
+      <div class="res-grid">
+        <div class="res-card"><div class="res-label" id="pr-l1">Date</div><div class="res-val" id="pr-v1">&#8212;</div></div>
+        <div class="res-card"><div class="res-label" id="pr-l2">From</div><div class="res-val" id="pr-v2">&#8212;</div></div>
+        <div class="res-card"><div class="res-label" id="pr-l3">Total</div><div class="res-val tg" id="pr-v3">&#8212;</div></div>
+        <div class="res-card"><div class="res-label" id="pr-l4">Category</div><div class="res-val" id="pr-v4">&#8212;</div></div>
+        <div class="res-card"><div class="res-label" id="pr-l5">Items</div><div class="res-val" id="pr-v5">&#8212;</div></div>
+        <div class="res-card"><div class="res-label" id="pr-l6">Tax Deductible</div><div class="res-val tg" id="pr-v6">&#8212;</div></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">Extracted Data Preview</div>
+      <div class="res-items" id="pr-items"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="save-btn" onclick="saveToSystem()" style="flex:2">&#10003; Save to All Modules</button>
+        <button onclick="closePDF()" style="flex:1;background:var(--card2);border:1px solid var(--border);color:var(--muted);padding:11px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ═══════════════════════════════
+// DATA STORE
+// ═══════════════════════════════
+// ══════════════════════════════════════════════
+// PERSISTENT DATA STORE (localStorage)
+// ══════════════════════════════════════════════
+function loadDB(){
+  try{
+    const saved=localStorage.getItem('graywolf_db');
+    if(saved){const p=JSON.parse(saved);return{settlements:p.settlements||[],loads:p.loads||[],fuel:{tractor:p.fuel?.tractor||[],reefer:p.fuel?.reefer||[]},reimbursements:p.reimbursements||[],deductions:p.deductions||[],maintenance:p.maintenance||[],tolls:{ezpass:p.tolls?.ezpass||[],drivewyze:p.tolls?.drivewyze||[]},loans:p.loans||[],assets:p.assets||{},operating:p.operating||{},documents:p.documents||[]};}
+  }catch(e){console.warn('DB load error:',e);}
+  return{settlements:[],loads:[],fuel:{tractor:[],reefer:[]},reimbursements:[],deductions:[],maintenance:[],tolls:{ezpass:[],drivewyze:[]},loans:[],assets:{},operating:{},documents:[]};
+}
+function saveDB(){
+  try{localStorage.setItem('graywolf_db',JSON.stringify(DB));}
+  catch(e){console.warn('DB save error:',e);}
+}
+const DB=loadDB();
+let pendingImport=null;
+let profitChartInst=null,donutInst=null,ytdInst=null;
+
+const TITLES={dashboard:'Dashboard',loads:'Loads',settlements:'Settlements',reimbursements:'Reimbursements',fuel:'Fuel',maintenance:'Maintenance',tolls:'Tolls & Fees',deductions:'Deductions',fixedcosts:'Fixed Costs',assets:'Assets',loans:'Loans',operating:'Operating Statement',documents:'Documents',reports:'Reports',tax:'Tax Estimator'};
+const SUBS={dashboard:'Overview of your fleet and business',loads:'Load details, routes and stop charges',settlements:'Weekly settlement breakdown',reimbursements:'Reimbursed expenses from carrier',fuel:'Tractor fuel, reefer fuel, DEF tracking',maintenance:'Repair invoices and warranty coverage',tolls:'EZ-Pass and DriveWyze charges',deductions:'All deductions from settlement',fixedcosts:'Fixed weekly and monthly costs',assets:'Truck, trailer and APU details',loans:'Loan and obligation tracker',operating:'Full P&L operating statement',documents:'PDF archive and document management',reports:'YTD performance and tax reports',tax:'2026 estimated federal + SE tax'};
+
+function sp(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  document.getElementById('ptitle').textContent=TITLES[id]||id;
+  document.getElementById('psub').textContent=SUBS[id]||'';
+  const renders={dashboard:renderDashboard,loads:renderLoads,settlements:renderSettlements,reimbursements:renderReimbursements,fuel:renderFuel,maintenance:renderMaintenance,tolls:renderTolls,deductions:renderDeductions,fixedcosts:renderFixedCosts,assets:renderAssets,loans:renderLoans,operating:renderOperating,documents:renderDocuments,reports:()=>{renderReports();setTimeout(renderYTDChart,150);},tax:syncTaxFromData};
+  if(renders[id])renders[id]();
+  if(id==='dashboard')setTimeout(renderProfitChart,150);
+}
+
+const $=id=>document.getElementById(id);
+const fmt=n=>'$'+(+(n||0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const fmtDate=d=>{if(!d)return'—';try{return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){return d;}};
+
+// ═══════════════════════════════
+// PDF OVERLAY
+// ═══════════════════════════════
+function openPDF(){$('pdf-overlay').classList.add('open');}
+function closePDF(){$('pdf-overlay').classList.remove('open');$('prog-box').style.display='none';$('res-preview').style.display='none';$('drop-zone').style.display='block';pendingImport=null;}
+function handleDrop(e){e.preventDefault();$('drop-zone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf')handleFile(f);else alert('Please drop a PDF file');}
+function handleDocDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f&&f.type==='application/pdf'){openPDF();setTimeout(()=>handleFile(f),100);}}
+$('pdf-overlay').addEventListener('click',e=>{if(e.target===$('pdf-overlay'))closePDF();});
+
+const STEPS=['Reading document...','Identifying document type...','Extracting data fields...','Analyzing amounts & dates...','Routing to correct modules...','AI processing...'];
+
+const DOC_TYPES={
+  settlement:{icon:'💰',label:'Prime Inc. Paycheck / Settlement',routing:'Settlements · Loads · Fuel · Deductions · Tolls · Reimbursements · Loans · Assets'},
+  fuel:{icon:'⛽',label:'Fuel Receipt',routing:'Fuel Log'},
+  maintenance:{icon:'🔧',label:'Repair / Maintenance Invoice',routing:'Maintenance · Reimbursements'},
+  amazon:{icon:'📦',label:'Amazon Order',routing:'Asset Register · Document Vault'},
+  store:{icon:'🛒',label:'Store Receipt',routing:'Document Vault · Credit Cards'},
+  toll:{icon:'🛣️',label:'Toll Bill (EZ-Pass / DriveWyze)',routing:'Tolls & Fees'},
+  insurance:{icon:'🛡️',label:'Insurance Document',routing:'Document Vault · Fixed Costs'},
+  tax:{icon:'📋',label:'Tax Document',routing:'Document Vault · Tax Estimator'},
+  loan:{icon:'🏦',label:'Loan Statement',routing:'Loan Center'},
+  other:{icon:'📄',label:'General Document',routing:'Document Vault'}
+};
+
+async function handleFile(file){
+  if(!file)return;
+  $('drop-zone').style.display='none';
+  $('prog-box').style.display='block';
+  $('res-preview').style.display='none';
+  const stepsEl=$('prog-steps');
+  stepsEl.innerHTML='';
+  for(let i=0;i<STEPS.length-1;i++){
+    await new Promise(r=>setTimeout(r,280));
+    stepsEl.innerHTML+=`<div class="prog-step"><div class="step-dot done">&#10003;</div><span>${STEPS[i]}</span></div>`;
+  }
+  stepsEl.innerHTML+=`<div class="prog-step"><div class="step-dot spin"></div><span>${STEPS[STEPS.length-1]}</span></div>`;
+  try{
+    const base64=await fileToBase64(file);
+    const isImage=file.type.startsWith('image/');
+    const mtype=file.type||'application/pdf';
+
+    const prompt=`You are an AI assistant for Graywolf Logistics LLC trucking business. Analyze this document and return ONLY valid JSON (no markdown, no explanation).
+
+First identify the document type from: settlement, fuel, maintenance, amazon, store, toll, insurance, tax, loan, other
+
+Then extract ALL data. Return this exact structure (fill only relevant fields, use null for irrelevant ones):
+{
+  "docType": "settlement|fuel|maintenance|amazon|store|toll|insurance|tax|loan|other",
+  "date": "YYYY-MM-DD",
+  "vendor": "company/store name",
+  "totalAmount": 0,
+  "taxDeductible": true,
+  "bizPct": 100,
+  "summary": "one line description",
+
+  "settlement": {
+    "weekEnding": "", "carrier": "", "unit": "", "owner": "",
+    "grossRevenue": 0, "reimbursements": 0, "totalDeductions": 0, "netPay": 0,
+    "totalMiles": 0, "loadedMiles": 0, "emptyMiles": 0, "weeksInService": 0,
+    "revenueItems": [{"desc":"","order":"","amount":0}],
+    "reimbursementItems": [{"desc":"","ref":"","amount":0}],
+    "loads": [{"order":"","from":"","to":"","loadedMiles":0,"emptyMiles":0,"revenue":0,"rate":0,"shipper":""}],
+    "stops": [{"order":"","type":"","location":"","amount":0}],
+    "tractorFuel": [{"date":"","location":"","gallons":0,"amount":0,"discount":0}],
+    "reeferFuel": [{"date":"","location":"","gallons":0,"amount":0,"discount":0}],
+    "deductions": [{"code":"","desc":"","balance":0,"amount":0,"category":""}],
+    "maintenance": [{"invoice":"","unit":"","desc":"","parts":0,"labor":0,"total":0,"covered":0}],
+    "tolls": {"ezpass":{"total":0,"items":[]},"drivewyze":{"total":0,"items":[]}},
+    "loans": [{"name":"","balance":0,"payment":0,"frequency":"","nextDue":""}],
+    "assets": {"tractor":{"unit":"","year":"","make":"","model":"","vin":"","license":"","odometer":0},"apu":{"unit":"","make":"","model":"","vin":"","hours":0,"rental":0}},
+    "operating": {"ytdRevenue":0,"ytdExpenses":0,"ytdNet":0,"ltdMiles":0,"weeksInService":0}
+  },
+
+  "fuel": {
+    "type": "tractor|reefer|def|other",
+    "station": "", "location": "", "gallons": 0,
+    "pricePerGallon": 0, "gross": 0, "discount": 0, "net": 0,
+    "cardUsed": "", "truckUnit": ""
+  },
+
+  "maintenance": {
+    "invoice": "", "shop": "", "unit": "", "description": "",
+    "parts": 0, "labor": 0, "shopSupplies": 0, "total": 0,
+    "warrantyCredit": 0, "netCost": 0,
+    "lineItems": [{"system":"","desc":"","amount":0}]
+  },
+
+  "purchase": {
+    "items": [{"name":"","qty":1,"price":0,"category":""}],
+    "subtotal": 0, "tax": 0, "shipping": 0, "total": 0,
+    "orderNumber": "", "paymentMethod": ""
+  },
+
+  "toll": {
+    "provider": "ezpass|drivewyze|other",
+    "period": "", "account": "",
+    "items": [{"date":"","location":"","amount":0}],
+    "total": 0
+  },
+
+  "loan": {
+    "lender": "", "accountNumber": "",
+    "previousBalance": 0, "payment": 0, "currentBalance": 0,
+    "interestRate": 0, "nextDue": ""
+  }
+}`;
+
+    const contentBlock = isImage
+      ? {type:'image',source:{type:'base64',media_type:mtype,data:base64}}
+      : {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}};
+
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:4000,
+        messages:[{role:'user',content:[contentBlock,{type:'text',text:prompt}]}]
+      })
+    });
+    if(!resp.ok)throw new Error('API HTTP '+resp.status);
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    const rawText=data.content.map(i=>i.text||'').join('');
+    let parsed=null;
+    for(const fn of[t=>JSON.parse(t),t=>JSON.parse(t.replace(/```json|```/g,'').trim()),t=>{const m=t.match(/\{[\s\S]*\}/);if(m)return JSON.parse(m[0]);throw new Error('no json');}]){
+      try{parsed=fn(rawText);break;}catch(e){}
+    }
+    if(!parsed)throw new Error('Could not parse AI response: '+rawText.slice(0,150));
+    parsed._filename=file.name;
+    pendingImport=parsed;
+    showUniversalPreview(parsed);
+  }catch(err){
+    stepsEl.innerHTML+=`<div class="prog-step"><div class="step-dot" style="background:var(--red);border-color:var(--red)">!</div><span style="color:var(--red)">Error: ${err.message}</span></div>`;
+    console.error('Import error:',err);
+  }
+}
+
+function showUniversalPreview(d){
+  const dt=DOC_TYPES[d.docType]||DOC_TYPES.other;
+  $('pr-icon').textContent=dt.icon;
+  $('pr-doctype').textContent=dt.label;
+  $('pr-routing').textContent='→ '+dt.routing;
+  $('pr-amount').textContent=d.totalAmount?fmt(d.totalAmount):'';
+  $('pr-amount').style.color=d.taxDeductible?'var(--green)':'var(--text)';
+  $('pr-v1').textContent=d.date||'—';
+  $('pr-v2').textContent=d.vendor||'—';
+  $('pr-v3').textContent=d.totalAmount?fmt(d.totalAmount):'—';
+  $('pr-v4').textContent=d.docType||'—';
+  $('pr-v5').textContent=d.summary||'—';
+  $('pr-v6').textContent=d.taxDeductible?'✅ Yes':'❌ No';
+  // Build preview items based on doc type
+  let items=[];
+  if(d.docType==='settlement'&&d.settlement){
+    const s=d.settlement;
+    items=[
+      {l:'Gross Revenue',v:s.grossRevenue,c:'var(--green)'},
+      {l:'Net Pay',v:s.netPay,c:'var(--accent)'},
+      {l:'Total Deductions',v:s.totalDeductions,c:'var(--red)'},
+      {l:'Total Miles',v:null,t:(s.totalMiles||0).toLocaleString()+' mi'},
+      {l:'Loads',v:null,t:(s.loads||[]).length+' loads'},
+      {l:'Tractor Fuel',v:(s.tractorFuel||[]).reduce((a,x)=>a+(x.amount||0),0),c:'var(--red)'},
+      {l:'Reefer Fuel',v:(s.reeferFuel||[]).reduce((a,x)=>a+(x.amount||0),0),c:'var(--red)'},
+      ...(s.revenueItems||[]).slice(0,4).map(x=>({l:x.desc,v:x.amount,c:'var(--green)'})),
+      ...(s.deductions||[]).slice(0,4).map(x=>({l:x.code+' '+x.desc,v:x.amount,c:'var(--red)'})),
+    ];
+  } else if(d.docType==='fuel'&&d.fuel){
+    const f=d.fuel;
+    items=[
+      {l:'Type',v:null,t:f.type},
+      {l:'Station',v:null,t:f.station},
+      {l:'Gallons',v:null,t:(f.gallons||0).toFixed(1)+' gal'},
+      {l:'Price/Gal',v:null,t:'$'+(f.pricePerGallon||0).toFixed(3)},
+      {l:'Gross',v:f.gross,c:'var(--red)'},
+      {l:'Discount',v:f.discount,c:'var(--green)'},
+      {l:'Net Cost',v:f.net,c:'var(--red)'},
+    ];
+  } else if(d.docType==='maintenance'&&d.maintenance){
+    const m=d.maintenance;
+    items=[
+      {l:'Shop',v:null,t:m.shop},
+      {l:'Invoice',v:null,t:m.invoice},
+      {l:'Parts',v:m.parts,c:'var(--red)'},
+      {l:'Labor',v:m.labor,c:'var(--red)'},
+      {l:'Total',v:m.total,c:'var(--red)'},
+      {l:'Warranty Credit',v:m.warrantyCredit,c:'var(--green)'},
+      {l:'Net Cost',v:m.netCost,c:'var(--red)'},
+      ...(m.lineItems||[]).map(x=>({l:x.system+': '+x.desc,v:x.amount,c:'var(--red)'})),
+    ];
+  } else if((d.docType==='amazon'||d.docType==='store')&&d.purchase){
+    const p=d.purchase;
+    items=[
+      {l:'Order #',v:null,t:p.orderNumber||'—'},
+      {l:'Items',v:null,t:(p.items||[]).length+' items'},
+      {l:'Subtotal',v:p.subtotal,c:'var(--text)'},
+      {l:'Tax',v:p.tax,c:'var(--red)'},
+      {l:'Shipping',v:p.shipping,c:'var(--red)'},
+      {l:'Total',v:p.total,c:'var(--red)'},
+      ...(p.items||[]).slice(0,5).map(x=>({l:x.name,v:x.price,c:'var(--text)'})),
+    ];
+  } else if(d.docType==='toll'&&d.toll){
+    const t=d.toll;
+    items=[
+      {l:'Provider',v:null,t:t.provider},
+      {l:'Period',v:null,t:t.period},
+      {l:'Stops',v:null,t:(t.items||[]).length+' locations'},
+      {l:'Total',v:t.total,c:'var(--red)'},
+      ...(t.items||[]).slice(0,6).map(x=>({l:x.date+' '+x.location,v:x.amount,c:'var(--red)'})),
+    ];
+  } else if(d.docType==='loan'&&d.loan){
+    const l=d.loan;
+    items=[
+      {l:'Lender',v:null,t:l.lender},
+      {l:'Previous Balance',v:l.previousBalance,c:'var(--red)'},
+      {l:'Payment Made',v:l.payment,c:'var(--green)'},
+      {l:'Current Balance',v:l.currentBalance,c:'var(--red)'},
+      {l:'Interest Rate',v:null,t:(l.interestRate||0)+'%'},
+      {l:'Next Due',v:null,t:l.nextDue||'—'},
+    ];
+  } else {
+    items=[
+      {l:'Amount',v:d.totalAmount,c:'var(--text)'},
+      {l:'Summary',v:null,t:d.summary||'—'},
+    ];
+  }
+  $('pr-items').innerHTML=items.filter(x=>x.v||x.t).map(x=>`<div class="res-item"><span>${x.l}</span><span style="color:${x.c||'var(--text)'};font-weight:600">${x.t||(x.v!=null?fmt(x.v):'—')}</span></div>`).join('');
+  $('prog-box').style.display='none';
+  $('res-preview').style.display='block';
+}
+
+function fileToBase64(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});}
+
+function showPreview(d){
+  $('pr-date').textContent=fmtDate(d.date)||d.weekEnding||'—';
+  $('pr-gross').textContent=fmt(d.grossRevenue);
+  $('pr-net').textContent=fmt(d.netPay);
+  $('pr-ded').textContent=fmt(d.totalDeductions);
+  $('pr-miles').textContent=(d.totalMiles||0).toLocaleString()+' mi';
+  $('pr-loads').textContent=(d.loads||[]).length+' loads';
+  const items=[...(d.revenueItems||[]).slice(0,5).map(x=>({l:x.desc,v:x.amount,c:'var(--green)'})),...(d.deductions||[]).slice(0,4).map(x=>({l:x.code+' '+x.desc,v:x.amount,c:'var(--red)'})),...(d.reimbursementItems||[]).slice(0,3).map(x=>({l:x.desc,v:x.amount,c:'var(--accent)'}))];
+  $('pr-items').innerHTML=items.map(x=>`<div class="res-item"><span>${x.l}</span><span style="color:${x.c};font-weight:600">${fmt(x.v)}</span></div>`).join('');
+  $('prog-box').style.display='none';
+  $('res-preview').style.display='block';
+}
+
+function saveToSystem(){
+  if(!pendingImport)return;
+  const d=pendingImport;
+  const dt=d.docType||'other';
+  let savedMsg='';
+
+  if(dt==='settlement'&&d.settlement){
+    const s=d.settlement;
+    // Settlement record
+    DB.settlements.push({id:uid(),date:d.date,weekEnding:s.weekEnding,carrier:s.carrier,gross:s.grossRevenue,reimb:s.reimbursements,ded:s.totalDeductions,net:s.netPay,miles:s.totalMiles,loadedMiles:s.loadedMiles,revenueItems:s.revenueItems||[],reimbItems:s.reimbursementItems||[],filename:d._filename});
+    // Loads
+    (s.loads||[]).forEach(l=>DB.loads.push({id:uid(),date:d.date,...l,stops:(s.stops||[]).filter(x=>x.order===l.order)}));
+    // Tractor fuel
+    (s.tractorFuel||[]).forEach(f=>DB.fuel.tractor.push({id:uid(),date:f.date||d.date,...f}));
+    // Reefer fuel
+    (s.reeferFuel||[]).forEach(f=>DB.fuel.reefer.push({id:uid(),date:f.date||d.date,...f}));
+    // Reimbursements
+    (s.reimbursementItems||[]).forEach(r=>DB.reimbursements.push({id:uid(),date:d.date,...r}));
+    // Deductions (includes fuel charges, DEF, tolls as line items)
+    (s.deductions||[]).forEach(x=>DB.deductions.push({id:uid(),date:d.date,...x}));
+    // Maintenance
+    (s.maintenance||[]).forEach(m=>DB.maintenance.push({id:uid(),date:d.date,...m}));
+    // Tolls from settlement
+    (s.tolls?.ezpass?.items||[]).forEach(t=>DB.tolls.ezpass.push({id:uid(),...t}));
+    (s.tolls?.drivewyze?.items||[]).forEach(t=>DB.tolls.drivewyze.push({id:uid(),...t}));
+    // Loans
+    (s.loans||[]).forEach(l=>{const ex=DB.loans.find(x=>x.name===l.name);if(!ex)DB.loans.push({id:uid(),...l});else{ex.balance=l.balance;ex.nextDue=l.nextDue;}});
+    // Assets
+    if(s.assets?.tractor)DB.assets.tractor=s.assets.tractor;
+    if(s.assets?.apu)DB.assets.apu=s.assets.apu;
+    // Operating YTD
+    if(s.operating)DB.operating={...DB.operating,...s.operating};
+    if(s.weekEnding||d.date)$('btn-week').textContent='&#128197; Week '+(s.weekEnding||fmtDate(d.date));
+    savedMsg=`✅ Paycheck Saved!\n\nGross: ${fmt(s.grossRevenue)}\nNet: ${fmt(s.netPay)}\nMiles: ${(s.totalMiles||0).toLocaleString()}\nLoads: ${(s.loads||[]).length}\nFuel records: ${(s.tractorFuel||[]).length+(s.reeferFuel||[]).length}\nDeductions: ${(s.deductions||[]).length}`;
+
+  } else if(dt==='fuel'&&d.fuel){
+    const f=d.fuel;
+    const fuelRecord={id:uid(),date:d.date,location:f.station+(f.location?' — '+f.location:''),gallons:f.gallons,amount:f.gross,discount:f.discount,net:f.net};
+    if(f.type==='reefer')DB.fuel.reefer.push(fuelRecord);
+    else DB.fuel.tractor.push(fuelRecord);
+    // Also add to vault
+    DB_vault.push({name:d._filename||'Fuel Receipt',cat:'prime',date:d.date,amount:f.net||f.gross,taxDed:'yes',notes:`${f.type} fuel — ${(f.gallons||0).toFixed(1)} gal @ ${f.station}`,savedAt:new Date().toISOString()});
+    localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));
+    savedMsg=`✅ Fuel Receipt Saved!\n\n${f.type||'Tractor'} fuel\n${(f.gallons||0).toFixed(1)} gallons\nNet cost: ${fmt(f.net||f.gross)}\nDiscount: ${fmt(f.discount||0)}`;
+
+  } else if(dt==='maintenance'&&d.maintenance){
+    const m=d.maintenance;
+    DB.maintenance.push({id:uid(),date:d.date,invoice:m.invoice,unit:m.unit,desc:m.description,parts:m.parts,labor:m.labor,total:m.total,covered:m.warrantyCredit});
+    if(m.warrantyCredit>0)DB.reimbursements.push({id:uid(),date:d.date,desc:'Warranty — '+m.description,ref:m.invoice,amount:m.warrantyCredit});
+    DB_vault.push({name:m.invoice||d._filename,cat:'prime',date:d.date,amount:m.netCost||m.total,taxDed:'yes',notes:m.description,savedAt:new Date().toISOString()});
+    localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));
+    savedMsg=`✅ Invoice Saved!\n\nInvoice: ${m.invoice}\nTotal: ${fmt(m.total)}\nWarranty Credit: ${fmt(m.warrantyCredit||0)}\nYou Pay: ${fmt(m.netCost||m.total)}`;
+
+  } else if((dt==='amazon'||dt==='store')&&d.purchase){
+    const p=d.purchase;
+    (p.items||[]).forEach(item=>{
+      DB_assets2.push({name:item.name,cat:dt==='amazon'?'Electronics':'Other',date:d.date,cost:item.price,from:d.vendor||dt,bizPct:d.bizPct||100,notes:d._filename});
+    });
+    localStorage.setItem('fleet_assets2',JSON.stringify(DB_assets2));
+    DB_vault.push({name:p.orderNumber||d._filename,cat:dt==='amazon'?'amazon':'personal',date:d.date,amount:p.total,taxDed:d.taxDeductible?'yes':'no',notes:`${(p.items||[]).length} items from ${d.vendor}`,savedAt:new Date().toISOString()});
+    localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));
+    savedMsg=`✅ Purchase Saved!\n\n${d.vendor} order\n${(p.items||[]).length} items → Asset Register\nTotal: ${fmt(p.total)}\nTax Deductible: ${d.taxDeductible?'Yes':'No'}`;
+
+  } else if(dt==='toll'&&d.toll){
+    const t=d.toll;
+    const target=t.provider==='drivewyze'?DB.tolls.drivewyze:DB.tolls.ezpass;
+    (t.items||[]).forEach(x=>target.push({id:uid(),date:x.date,location:x.location,amount:x.amount}));
+    savedMsg=`✅ Toll Bill Saved!\n\nProvider: ${t.provider}\n${(t.items||[]).length} transactions\nTotal: ${fmt(t.total)}`;
+
+  } else if(dt==='loan'&&d.loan){
+    const l=d.loan;
+    const ex=DB_loans2.find(x=>x.lender===l.lender||x.name===l.lender);
+    if(ex){ex.balance=l.currentBalance;ex.due=l.nextDue;}
+    else DB_loans2.push({name:l.lender,lender:l.lender,balance:l.currentBalance,payment:l.payment,freq:'Monthly',apr:l.interestRate,due:l.nextDue});
+    localStorage.setItem('fleet_loans2',JSON.stringify(DB_loans2));
+    savedMsg=`✅ Loan Statement Saved!\n\nLender: ${l.lender}\nBalance: ${fmt(l.currentBalance)}\nPayment: ${fmt(l.payment)}`;
+
+  } else {
+    // Generic — goes to Document Vault
+    DB_vault.push({name:d._filename||'Document',cat:'personal',date:d.date,amount:d.totalAmount||0,taxDed:d.taxDeductible?'yes':'no',notes:d.summary||'',savedAt:new Date().toISOString()});
+    localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));
+    savedMsg=`✅ Document Saved!\n\nSaved to Document Vault\n${d.summary||''}`;
+  }
+
+  // Always add to documents log
+  DB.documents.push({filename:d._filename,date:d.date,docType:dt,amount:d.totalAmount||0,savedAt:new Date().toISOString()});
+
+  // PERSIST EVERYTHING
+  saveDB();
+  closePDF();
+  renderDashboard();
+  setTimeout(renderProfitChart,200);
+  alert(savedMsg+'\n\n💾 Data saved permanently to this PC.');
+}
+
+// ══════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════════════════════
+function renderDashboard(){
+  const rev=DB.settlements.reduce((a,x)=>a+x.gross,0);
+  const ded=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  const net=DB.settlements.reduce((a,x)=>a+x.net,0);
+  const miles=DB.settlements.reduce((a,x)=>a+(x.miles||0),0);
+  $('d-rev').textContent=fmt(rev);
+  $('d-ded').textContent=fmt(ded);
+  $('d-net').textContent=fmt(net);
+  $('d-net').className='sv '+(net>=0?'tg':'tr');
+  $('d-miles').textContent=miles.toLocaleString();
+  $('d-miles-sub').textContent=miles?fmt(rev/miles)+'/mi avg':'Import PDF';
+  const last=DB.settlements[DB.settlements.length-1];
+  if(last){
+    $('d-cashflow').innerHTML=`<div class="cf"><span class="tm">Gross Revenue</span><span class="tg">${fmt(last.gross)}</span></div><div class="cf"><span class="tm">Reimbursements</span><span class="tg">+${fmt(last.reimb||0)}</span></div><div class="cf"><span class="tm">Total Deductions</span><span class="tr">-${fmt(last.ded||0)}</span></div><div class="cf" style="border-top:1px solid var(--border);margin-top:4px"><strong>Net to Owner</strong><span style="color:var(--accent);font-size:15px;font-weight:700">${fmt(last.net)}</span></div><div style="font-size:10px;color:var(--muted);margin-top:6px">Week: ${last.weekEnding||fmtDate(last.date)}</div>`;
+  }
+  if(DB.loads.length){
+    $('d-loads-table').innerHTML='<table><thead><tr><th>Order</th><th>Route</th><th>Miles</th><th>Revenue</th></tr></thead><tbody>'+[...DB.loads].reverse().slice(0,5).map(x=>`<tr><td class="ta">${x.order||'—'}</td><td>${x.from||'—'} → ${x.to||'—'}</td><td>${(x.loadedMiles||0).toLocaleString()}</td><td class="tg">${fmt(x.revenue)}</td></tr>`).join('')+'</tbody></table>';
+  }
+  const cats={};
+  DB.fuel.tractor.forEach(x=>{cats['Tractor Fuel']=(cats['Tractor Fuel']||0)+(x.amount||0)-(x.discount||0);});
+  DB.fuel.reefer.forEach(x=>{cats['Reefer Fuel']=(cats['Reefer Fuel']||0)+(x.amount||0)-(x.discount||0);});
+  DB.deductions.forEach(x=>{const c=x.category||x.code||'Other';cats[c]=(cats[c]||0)+(x.amount||0);});
+  const catArr=Object.entries(cats).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const COLORS=['#4f7cff','#22c55e','#f59e0b','#a855f7','#ef4444'];
+  if(catArr.length){
+    const total=catArr.reduce((a,x)=>a+x[1],0);
+    $('d-donut-wrap').innerHTML=`<div style="display:flex;align-items:center;gap:14px"><div class="donut-wrap"><canvas id="donutChart"></canvas><div class="donut-lbl"><div style="font-size:12px;font-weight:700">${fmt(total)}</div><div style="font-size:9px;color:var(--muted)">Total</div></div></div><div style="flex:1">${catArr.map((c,i)=>`<div class="leg-row"><div class="leg-l"><div class="leg-d" style="background:${COLORS[i]}"></div>${c[0]}</div><span>${fmt(c[1])}</span></div>`).join('')}</div></div>`;
+    setTimeout(()=>{try{if(donutInst)donutInst.destroy();donutInst=new Chart($('donutChart').getContext('2d'),{type:'doughnut',data:{labels:catArr.map(c=>c[0]),datasets:[{data:catArr.map(c=>c[1]),backgroundColor:COLORS,borderWidth:0,hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:true,cutout:'72%',plugins:{legend:{display:false}}}});}catch(e){}},50);
+  }
+  const t=DB.assets.tractor;
+  if(t){$('d-truck').innerHTML=`<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span style="font-size:28px">🚛</span><div><div style="font-weight:600">${t.year||''} ${t.make||''} ${t.model||''}</div><div class="tm" style="font-size:11px">VIN: ${t.vin||'—'}</div></div></div><table><tbody><tr><td class="tm">Unit #</td><td>${t.unit||'—'}</td></tr><tr><td class="tm">Odometer</td><td>${(t.odometer||0).toLocaleString()} mi</td></tr></tbody></table>`;}
+  if(DB.loans.length){$('d-loans-dash').innerHTML=DB.loans.slice(0,3).map(l=>`<div class="cf"><div><div style="font-weight:600;font-size:12px">${l.name}</div><div class="tm" style="font-size:10px">${l.frequency}</div></div><div style="text-align:right"><div class="tr" style="font-weight:700">${fmt(l.balance||0)}</div><div class="tm" style="font-size:10px">${fmt(l.payment||0)}/pay</div></div></div>`).join('');}
+}
+
+function renderProfitChart(){
+  try{
+    const canvas=$('profitChart');if(!canvas)return;
+    const months={};
+    DB.settlements.forEach(x=>{if(!x.date)return;const d=new Date(x.date+'T12:00:00'),k=d.getFullYear()+'-'+(d.getMonth()+1);if(!months[k])months[k]={rev:0,exp:0,label:d.toLocaleDateString('en-US',{month:'short',year:'2-digit'})};months[k].rev+=x.gross;});
+    DB.deductions.forEach(x=>{if(!x.date)return;const d=new Date(x.date+'T12:00:00'),k=d.getFullYear()+'-'+(d.getMonth()+1);if(!months[k])months[k]={rev:0,exp:0,label:''};months[k].exp+=(x.amount||0);});
+    const keys=Object.keys(months).sort();if(!keys.length)return;
+    if(profitChartInst)profitChartInst.destroy();
+    profitChartInst=new Chart(canvas.getContext('2d'),{type:'line',data:{labels:keys.map(k=>months[k].label),datasets:[{label:'Revenue',data:keys.map(k=>months[k].rev),borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.08)',borderWidth:2,tension:.4,pointRadius:3},{label:'Expenses',data:keys.map(k=>months[k].exp),borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.05)',borderWidth:2,tension:.4,pointRadius:3},{label:'Net',data:keys.map(k=>months[k].rev-months[k].exp),borderColor:'#4f7cff',backgroundColor:'rgba(79,124,255,.07)',borderWidth:2,tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{labels:{color:'#7b85a3',font:{size:11},boxWidth:10,padding:12}}},scales:{x:{ticks:{color:'#7b85a3',font:{size:10}},grid:{color:'rgba(42,49,80,.4)'}},y:{ticks:{color:'#7b85a3',font:{size:10},callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'rgba(42,49,80,.4)'}}}}}); 
+  }catch(e){console.warn('profitChart:',e);}
+}
+
+function renderLoads(){
+  const tm=DB.loads.reduce((a,x)=>a+(x.loadedMiles||0),0);const tr=DB.loads.reduce((a,x)=>a+(x.revenue||0),0);
+  $('ls-count').textContent=DB.loads.length;$('ls-miles').textContent=tm.toLocaleString();$('ls-rpm').textContent=tm?fmt(tr/tm):'$0.00';
+  if(!DB.loads.length){$('loads-table').innerHTML='<div class="empty">Import PDF to populate loads</div>';return;}
+  $('loads-table').innerHTML='<table><thead><tr><th>Order</th><th>Date</th><th>Shipper</th><th>From</th><th>To</th><th>Ld Mi</th><th>Em Mi</th><th>Revenue</th><th>Rate</th></tr></thead><tbody>'+[...DB.loads].reverse().map(x=>`<tr><td class="ta">${x.order||'—'}</td><td>${fmtDate(x.date)}</td><td>${x.shipper||'—'}</td><td class="tm">${x.from||'—'}</td><td class="tm">${x.to||'—'}</td><td>${(x.loadedMiles||0).toLocaleString()}</td><td class="tm">${x.emptyMiles||0}</td><td class="tg">${fmt(x.revenue)}</td><td class="tm">$${(x.rate||0).toFixed(3)}</td></tr>`).join('')+'</tbody></table>';
+  const stops=DB.loads.flatMap(x=>(x.stops||[]).map(s=>({...s,order:x.order})));
+  if(stops.length)$('loads-stops').innerHTML='<table><thead><tr><th>Order</th><th>Type</th><th>Location</th><th>Amount</th></tr></thead><tbody>'+stops.map(s=>`<tr><td class="ta">${s.order||'—'}</td><td>${s.type||'—'}</td><td>${s.location||'—'}</td><td class="tg">${fmt(s.amount)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderSettlements(){
+  const gross=DB.settlements.reduce((a,x)=>a+x.gross,0);const reimb=DB.settlements.reduce((a,x)=>a+(x.reimb||0),0);const ded=DB.settlements.reduce((a,x)=>a+(x.ded||0),0);const net=DB.settlements.reduce((a,x)=>a+x.net,0);
+  $('s-gross').textContent=fmt(gross);$('s-reimb').textContent=fmt(reimb);$('s-ded').textContent=fmt(ded);$('s-net').textContent=fmt(net);
+  if(!DB.settlements.length){$('settlements-table').innerHTML='<div class="empty">Import PDF to populate</div>';return;}
+  $('settlements-table').innerHTML='<table><thead><tr><th>Date</th><th>Week</th><th>Carrier</th><th>Gross</th><th>Reimb.</th><th>Deductions</th><th>Net</th><th>Miles</th></tr></thead><tbody>'+[...DB.settlements].reverse().map(x=>`<tr><td>${fmtDate(x.date)}</td><td class="tm">${x.weekEnding||'—'}</td><td>${x.carrier||'—'}</td><td class="tg">${fmt(x.gross)}</td><td class="tg">+${fmt(x.reimb||0)}</td><td class="tr">-${fmt(x.ded||0)}</td><td style="color:var(--accent);font-weight:700">${fmt(x.net)}</td><td class="tm">${x.miles?x.miles.toLocaleString():'—'}</td></tr>`).join('')+'</tbody></table>';
+  const last=DB.settlements[DB.settlements.length-1];
+  if(last?.revenueItems?.length)$('s-rev-items').innerHTML=last.revenueItems.map(x=>`<div class="os-row"><span>${x.desc}${x.order?' ('+x.order+')':''}</span><span class="tg">${fmt(x.amount)}</span></div>`).join('');
+  if(last?.reimbItems?.length)$('s-reimb-items').innerHTML=last.reimbItems.map(x=>`<div class="os-row"><span>${x.desc}</span><span class="tg">${fmt(x.amount)}</span></div>`).join('');
+}
+
+function renderReimbursements(){
+  const total=DB.reimbursements.reduce((a,x)=>a+(x.amount||0),0);
+  const warranty=DB.reimbursements.filter(x=>/warranty|repair/i.test(x.desc||'')).reduce((a,x)=>a+(x.amount||0),0);
+  const fuel=DB.reimbursements.filter(x=>/fuel/i.test(x.desc||'')).reduce((a,x)=>a+(x.amount||0),0);
+  $('r-period').textContent=fmt(total);$('r-warranty').textContent=fmt(warranty);$('r-fuel').textContent=fmt(fuel);
+  if(!DB.reimbursements.length){$('reimb-table').innerHTML='<div class="empty">Import PDF to populate</div>';return;}
+  $('reimb-table').innerHTML='<table><thead><tr><th>Date</th><th>Description</th><th>Ref</th><th>Amount</th></tr></thead><tbody>'+DB.reimbursements.map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${x.desc||'—'}</td><td class="tm">${x.ref||'—'}</td><td class="tg">${fmt(x.amount)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderFuel(){
+  const tG=DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0),0);const tD=DB.fuel.tractor.reduce((a,x)=>a+(x.discount||0),0);
+  const rG=DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0),0);const rD=DB.fuel.reefer.reduce((a,x)=>a+(x.discount||0),0);
+  $('f-tractor').textContent=fmt(tG);$('f-reefer').textContent=fmt(rG);$('f-disc').textContent=fmt(tD+rD);$('f-net').textContent=fmt(tG+rG-tD-rD);
+  const ft=(arr,id)=>{if(!arr.length){$(id).innerHTML='<div class="empty">Import PDF</div>';return;}$(id).innerHTML='<table><thead><tr><th>Date</th><th>Location</th><th>Gallons</th><th>Amount</th><th>Discount</th><th>Net</th></tr></thead><tbody>'+arr.map(x=>`<tr><td>${fmtDate(x.date)}</td><td class="tm">${x.location||'—'}</td><td class="tm">${(x.gallons||0).toFixed(1)}</td><td class="tr">${fmt(x.amount)}</td><td class="tg">${x.discount?'-'+fmt(x.discount):'—'}</td><td class="tg">${fmt((x.amount||0)-(x.discount||0))}</td></tr>`).join('')+'</tbody></table>';};
+  ft(DB.fuel.tractor,'fuel-tractor');ft(DB.fuel.reefer,'fuel-reefer');
+}
+
+function renderMaintenance(){
+  const total=DB.maintenance.reduce((a,x)=>a+(x.total||0),0);const covered=DB.maintenance.reduce((a,x)=>a+(x.covered||0),0);
+  $('m-total').textContent=fmt(total);$('m-warranty').textContent=fmt(covered);$('m-oop').textContent=fmt(total-covered);
+  if(!DB.maintenance.length){$('maint-table').innerHTML='<div class="empty">Import PDF</div>';return;}
+  $('maint-table').innerHTML='<table><thead><tr><th>Invoice</th><th>Date</th><th>Unit</th><th>Description</th><th>Parts</th><th>Labor</th><th>Total</th><th>Covered</th></tr></thead><tbody>'+DB.maintenance.map(x=>`<tr><td class="ta">${x.invoice||'—'}</td><td>${fmtDate(x.date)}</td><td class="tm">${x.unit||'—'}</td><td>${x.desc||'—'}</td><td>${fmt(x.parts||0)}</td><td>${fmt(x.labor||0)}</td><td class="tr">${fmt(x.total||0)}</td><td>${x.covered?'<span class="badge bg">'+fmt(x.covered)+'</span>':'—'}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderTolls(){
+  const ez=DB.tolls.ezpass.reduce((a,x)=>a+(x.amount||0),0);const dw=DB.tolls.drivewyze.reduce((a,x)=>a+(x.amount||0),0);
+  $('t-ez').textContent=fmt(ez);$('t-dw').textContent=fmt(dw);$('t-total').textContent=fmt(ez+dw);
+  const tt=(arr,id)=>{if(!arr.length){$(id).innerHTML='<div class="empty">Import PDF</div>';return;}$(id).innerHTML='<div class="dw-scroll">'+arr.map(x=>`<div class="toll-item"><span>${x.date?fmtDate(x.date)+' — ':''} ${x.location||'—'}</span><span>${fmt(x.amount)}</span></div>`).join('')+`<div class="toll-item" style="font-weight:700;border-top:1px solid var(--border);margin-top:4px"><span>Total</span><span>${fmt(arr.reduce((a,x)=>a+(x.amount||0),0))}</span></div></div>`;};
+  tt(DB.tolls.ezpass,'tolls-ez');tt(DB.tolls.drivewyze,'tolls-dw');
+}
+
+function renderDeductions(){
+  const total=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  $('ded-total').textContent=fmt(total);
+  $('ded-var').textContent=fmt(DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0),0)+DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0),0));
+  $('ded-fix').textContent=fmt(DB.deductions.filter(x=>/truck|rent|license|statement|NP|LP/i.test((x.code||'')+(x.desc||''))).reduce((a,x)=>a+(x.amount||0),0));
+  if(!DB.deductions.length){$('ded-table').innerHTML='<div class="empty">Import PDF</div>';return;}
+  $('ded-table').innerHTML='<table><thead><tr><th>Code</th><th>Description</th><th>Balance</th><th>Amount</th><th>Category</th></tr></thead><tbody>'+DB.deductions.map(x=>`<tr><td class="ta">${x.code||'—'}</td><td>${x.desc||'—'}</td><td class="tm">${x.balance?fmt(x.balance):'—'}</td><td class="tr">${fmt(x.amount)}</td><td><span class="badge bb">${x.category||'—'}</span></td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderFixedCosts(){
+  const tp=DB.deductions.filter(x=>/NP|truck|rent/i.test((x.code||'')+(x.desc||''))).reduce((a,x)=>a+(x.amount||0),0);
+  const lp=DB.deductions.filter(x=>/LP|license|permit/i.test((x.code||'')+(x.desc||''))).reduce((a,x)=>a+(x.amount||0),0);
+  const tot=DB.deductions.filter(x=>/truck|rent|license|permit|statement|occup|hwy|federal|NP|LP|AS|OW|LF/i.test((x.code||'')+(x.desc||''))).reduce((a,x)=>a+(x.amount||0),0);
+  $('fc-truck').textContent=fmt(tp);$('fc-license').textContent=fmt(lp);$('fc-total').textContent=fmt(tot);
+  const fixed=DB.deductions.filter(x=>/truck|rent|license|permit|statement|occup|hwy|federal|NP|LP|AS|OW|LF/i.test((x.code||'')+(x.desc||'')));
+  if(!fixed.length){$('fc-table').innerHTML='<div class="empty">Import PDF</div>';return;}
+  $('fc-table').innerHTML='<table><thead><tr><th>Code</th><th>Description</th><th>Amount</th></tr></thead><tbody>'+fixed.map(x=>`<tr><td class="ta">${x.code||'—'}</td><td>${x.desc||'—'}</td><td class="tr">${fmt(x.amount)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderAssets(){
+  const t=DB.assets.tractor,a=DB.assets.apu;
+  $('assets-tractor').innerHTML=t?`<table><tbody><tr><td class="tm">Unit #</td><td>${t.unit||'—'}</td></tr><tr><td class="tm">Year/Make/Model</td><td>${t.year||''} ${t.make||''} ${t.model||''}</td></tr><tr><td class="tm">VIN</td><td>${t.vin||'—'}</td></tr><tr><td class="tm">License</td><td>${t.license||'—'}</td></tr><tr><td class="tm">Odometer</td><td>${(t.odometer||0).toLocaleString()} mi</td></tr></tbody></table>`:'<div class="empty">Import PDF to populate</div>';
+  $('assets-apu').innerHTML=a?`<table><tbody><tr><td class="tm">APU Unit</td><td>${a.unit||'—'}</td></tr><tr><td class="tm">Make/Model</td><td>${a.make||''} ${a.model||''}</td></tr><tr><td class="tm">VIN</td><td>${a.vin||'—'}</td></tr><tr><td class="tm">Hours</td><td>${(a.hours||0).toLocaleString()} hrs</td></tr><tr><td class="tm">Weekly Rental</td><td>${fmt(a.rental||0)}</td></tr></tbody></table>`:'<div class="empty">Import PDF to populate</div>';
+}
+
+function renderLoans(){
+  const tb=DB.loans.reduce((a,x)=>a+(x.balance||0),0);const wp=DB.loans.filter(x=>/weekly/i.test(x.frequency||'')).reduce((a,x)=>a+(x.payment||0),0);
+  $('ln-total').textContent=fmt(tb);$('ln-weekly').textContent=fmt(wp);$('ln-count').textContent=DB.loans.length;
+  if(!DB.loans.length){$('loans-table').innerHTML='<div class="empty">Import PDF</div>';return;}
+  $('loans-table').innerHTML='<table><thead><tr><th>Name</th><th>Balance</th><th>Payment</th><th>Frequency</th><th>Next Due</th></tr></thead><tbody>'+DB.loans.map(x=>`<tr><td style="font-weight:600">${x.name||'—'}</td><td class="tr">${fmt(x.balance||0)}</td><td>${fmt(x.payment||0)}</td><td class="tm">${x.frequency||'—'}</td><td style="color:var(--orange)">${fmtDate(x.nextDue)}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderOperating(){
+  const miles=DB.settlements.reduce((a,x)=>a+(x.miles||0),0);
+  const rev=DB.operating.ytdRevenue||DB.settlements.reduce((a,x)=>a+x.gross,0);
+  const exp=DB.operating.ytdExpenses||DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  const net=DB.operating.ytdNet||(rev-exp);
+  $('op-rev').textContent=fmt(rev);$('op-rev-mi').textContent=miles?fmt(rev/miles)+'/mi':'';
+  $('op-exp').textContent=fmt(exp);$('op-exp-mi').textContent=miles?fmt(exp/miles)+'/mi':'';
+  $('op-net').textContent=fmt(net);$('op-net').className='sv '+(net>=0?'tg':'tr');
+  $('op-net-mi').textContent=miles?fmt(net/miles)+'/mi':'';
+  $('op-weeks').textContent=DB.operating.weeksInService||DB.settlements.length;
+  const rc={};DB.settlements.flatMap(x=>x.revenueItems||[]).forEach(x=>{rc[x.desc]=(rc[x.desc]||0)+(x.amount||0);});
+  $('op-rev-detail').innerHTML=Object.entries(rc).map(([k,v])=>`<div class="os-row"><span>${k}</span><span class="tg">${fmt(v)}</span></div>`).join('')+`<div class="os-row tot"><span>Total</span><span class="tg">${fmt(rev)}</span></div>`;
+  const ec={};DB.deductions.forEach(x=>{const c=x.category||x.code||'Other';ec[c]=(ec[c]||0)+(x.amount||0);});
+  $('op-exp-detail').innerHTML=Object.entries(ec).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="os-row"><span>${k}</span><span class="tr">${fmt(v)}</span></div>`).join('')+`<div class="os-row tot"><span>Total</span><span class="tr">${fmt(exp)}</span></div><div class="os-row tot" style="font-size:14px"><span>NET INCOME</span><span class="${net>=0?'tg':'tr'}">${fmt(net)}</span></div>`;
+  $('op-ytd').innerHTML=`<div class="g3" style="margin:0"><div><div class="tm" style="font-size:11px">YTD Revenue</div><div style="font-size:20px;font-weight:700;color:var(--green)">${fmt(DB.operating.ytdRevenue||rev)}</div></div><div><div class="tm" style="font-size:11px">YTD Expenses</div><div style="font-size:20px;font-weight:700;color:var(--red)">${fmt(DB.operating.ytdExpenses||exp)}</div></div><div><div class="tm" style="font-size:11px">YTD Net</div><div style="font-size:20px;font-weight:700;color:var(--accent)">${fmt(DB.operating.ytdNet||net)}</div></div></div>`;
+}
+
+function renderDocuments(){
+  if(!DB.documents.length){$('doc-archive').innerHTML='<div class="empty">&#128193; No documents yet.</div>';return;}
+  $('doc-archive').innerHTML='<table><thead><tr><th>File</th><th>Type</th><th>Date</th><th>Amount</th></tr></thead><tbody>'+DB.documents.map(d=>`<tr><td style="font-weight:600">${d.filename||'—'}</td><td><span class="badge bb">${d.docType||'doc'}</span></td><td>${fmtDate(d.date)}</td><td>${d.amount?fmt(d.amount):'—'}</td></tr>`).join('')+'</tbody></table>';
+}
+
+function renderReports(){
+  const rev=DB.operating.ytdRevenue||DB.settlements.reduce((a,x)=>a+x.gross,0);
+  const exp=DB.operating.ytdExpenses||DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  const net=DB.operating.ytdNet||(rev-exp);
+  const miles=DB.settlements.reduce((a,x)=>a+(x.miles||0),0);
+  $('rp-rev').textContent=fmt(rev);$('rp-rev-mi').textContent=miles?fmt(rev/miles)+'/mi':'';
+  $('rp-exp').textContent=fmt(exp);$('rp-net').textContent=fmt(net);$('rp-net').className='sv '+(net>=0?'tg':'tr');
+  const rc={};DB.settlements.flatMap(x=>x.revenueItems||[]).forEach(x=>{rc[x.desc]=(rc[x.desc]||0)+(x.amount||0);});
+  $('rp-rev-detail').innerHTML=Object.entries(rc).map(([k,v])=>`<div class="os-row"><span>${k}</span><span class="tg">${fmt(v)}</span></div>`).join('')+`<div class="os-row tot"><span>Total</span><span class="tg">${fmt(rev)}</span></div>`;
+  const ec={};DB.deductions.forEach(x=>{const c=x.category||x.code||'Other';ec[c]=(ec[c]||0)+(x.amount||0);});
+  $('rp-exp-detail').innerHTML=Object.entries(ec).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="os-row"><span>${k}</span><span class="tr">${fmt(v)}</span></div>`).join('')+`<div class="os-row tot"><span>Total</span><span class="tr">${fmt(exp)}</span></div>`;
+}
+
+function renderYTDChart(){
+  try{
+    const canvas=$('ytdChart');if(!canvas)return;
+    const rev=DB.operating.ytdRevenue||DB.settlements.reduce((a,x)=>a+x.gross,0);
+    const exp=DB.operating.ytdExpenses||DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+    const net=DB.operating.ytdNet||(rev-exp);
+    if(ytdInst)ytdInst.destroy();
+    ytdInst=new Chart(canvas.getContext('2d'),{type:'bar',data:{labels:['Revenue','Expenses','Net Income'],datasets:[{data:[rev,exp,net],backgroundColor:['rgba(34,197,94,.7)','rgba(239,68,68,.7)','rgba(79,124,255,.7)'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7b85a3'},grid:{display:false}},y:{ticks:{color:'#7b85a3',callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'rgba(42,49,80,.4)'}}}}});
+  }catch(e){console.warn('ytdChart:',e);}
+}
+
+function syncTaxFromData(){
+  const rev=DB.operating.ytdRevenue||DB.settlements.reduce((a,x)=>a+x.gross,0);
+  const exp=DB.operating.ytdExpenses||DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  if(rev){$('ti-rev').value=rev.toFixed(0);$('ti-exp').value=exp.toFixed(0);$('tx-net').textContent=fmt(rev-exp);calcTax();}
+}
+
+function calcTax(){
+  const rev=parseFloat($('ti-rev').value)||0,exp=parseFloat($('ti-exp').value)||0,other=parseFloat($('ti-other').value)||0,sep=parseFloat($('ti-sep').value)||0,health=parseFloat($('ti-health').value)||0,status=$('ti-status').value;
+  const netP=Math.max(0,rev-exp),seBase=netP*0.9235,seTax=seBase*0.153,seDed=seTax*0.5;
+  const agi=Math.max(0,netP+other-seDed-sep-health);
+  const std=status==='mfj'?30000:status==='hoh'?22500:15000;
+  const taxable=Math.max(0,agi-std);
+  const brk=status==='mfj'?[[0,23850,.10],[23850,96950,.12],[96950,206700,.22],[206700,394600,.24],[394600,501050,.32],[501050,751600,.35],[751600,1/0,.37]]:status==='hoh'?[[0,17000,.10],[17000,64850,.12],[64850,103350,.22],[103350,197300,.24],[197300,252150,.32],[252150,626350,.35],[626350,1/0,.37]]:[[0,11925,.10],[11925,48475,.12],[48475,103350,.22],[103350,197300,.24],[197300,250525,.32],[250525,626350,.35],[626350,1/0,.37]];
+  let fed=0,detail='';
+  for(const[lo,hi,r]of brk){if(taxable<=lo)break;const chunk=Math.min(taxable,hi)-lo;fed+=chunk*r;detail+=`<div class="os-row"><span>${(r*100).toFixed(0)}% on ${fmt(chunk)}</span><span class="tr">${fmt(chunk*r)}</span></div>`;}
+  const tot=seTax+fed,qtr=tot/4;
+  $('r-np').textContent=fmt(netP);$('r-seb').textContent=fmt(seBase);$('r-set').textContent=fmt(seTax);$('r-sed').textContent='-'+fmt(seDed);
+  $('r-agi').textContent=fmt(agi);$('r-std').textContent='-'+fmt(std);$('r-taxable').textContent=fmt(taxable);
+  $('r-brackets').innerHTML=detail;$('r-fed').textContent=fmt(fed);$('r-tot').textContent=fmt(tot);
+  $('r-eff').textContent=netP?((tot/netP)*100).toFixed(1)+'% effective rate':'—';
+  ['q1','q2','q3','q4'].forEach(id=>$(id).textContent=fmt(qtr));
+  $('r-weekly').textContent=fmt(tot/52);
+  $('tx-net').textContent=fmt(netP);$('tx-total').textContent=fmt(tot);$('tx-qtr').textContent=fmt(qtr);
+  $('tax-results').style.display='grid';
+}
+
+function exportJSON(){
+  const blob=new Blob([JSON.stringify({DB,loans:DB_loans2,cards:DB_cards,cardPurchases:DB_cardPurchases,vault:DB_vault,assets:DB_assets2},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='graywolf-logistics-export-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);
+}
+
+// ══════════════════════════════════════════════
+// TRUCK HEALTH
+// ══════════════════════════════════════════════
+const HEALTH_INTERVALS={oil:15000,valve:100000,dpf:200000,trans:150000,coolantDays:730};
+const DB_health=JSON.parse(localStorage.getItem('fleet_health')||'{}');
+
+function calcHealth(){
+  const odo=parseFloat(document.getElementById('hs-odo').value)||377445;
+  const lastOil=parseFloat(document.getElementById('hs-oil').value)||0;
+  const lastValve=parseFloat(document.getElementById('hs-valve').value)||0;
+  const lastDpf=parseFloat(document.getElementById('hs-dpf').value)||0;
+  const lastTrans=parseFloat(document.getElementById('hs-trans').value)||0;
+  const coolantDate=document.getElementById('hs-coolant').value;
+  const tireDate=document.getElementById('hs-tires').value;
+  const battDate=document.getElementById('hs-battery').value;
+  const h={odo,lastOil,lastValve,lastDpf,lastTrans,coolantDate,tireDate,battDate};
+  localStorage.setItem('fleet_health',JSON.stringify(h));
+  renderHealth(h);
+}
+
+function renderHealth(h){
+  if(!h||!h.odo)return;
+  const odo=h.odo||377445;
+  const oil=HEALTH_INTERVALS.oil-(odo-(h.lastOil||0));
+  const valve=HEALTH_INTERVALS.valve-(odo-(h.lastValve||0));
+  const dpf=HEALTH_INTERVALS.dpf-(odo-(h.lastDpf||0));
+  const trans=HEALTH_INTERVALS.trans-(odo-(h.lastTrans||0));
+  const coolantDays=h.coolantDate?Math.round((HEALTH_INTERVALS.coolantDays*86400000-(Date.now()-new Date(h.coolantDate).getTime()))/86400000):null;
+  const tireMonths=h.tireDate?Math.round((Date.now()-new Date(h.tireDate).getTime())/(30*86400000)):null;
+  const battMonths=h.battDate?Math.round((Date.now()-new Date(h.battDate).getTime())/(30*86400000)):null;
+  const setText=(id,v,unit,warn,danger)=>{const el=$(id);if(!el)return;el.textContent=Math.round(v).toLocaleString();el.style.color=v<danger?'var(--red)':v<warn?'var(--orange)':'var(--green)';const sub=$(id+'-sub');if(sub)sub.textContent=unit+(v<0?' OVERDUE!':'');};
+  setText('h-oil-remain',oil,'miles remaining',3000,0);
+  setText('h-valve-remain',valve,'miles remaining',10000,0);
+  setText('h-dpf-remain',dpf,'miles remaining',20000,0);
+  setText('h-trans-remain',trans,'miles remaining',15000,0);
+  if(coolantDays!==null)setText('h-coolant-remain',coolantDays,'days remaining',90,0);
+  if(tireMonths!==null){$('h-tires').textContent=tireMonths+' mo';$('h-tires').style.color=tireMonths>48?'var(--red)':tireMonths>36?'var(--orange)':'var(--green)';}
+  if(battMonths!==null){$('h-battery').textContent=battMonths+' mo';$('h-battery').style.color=battMonths>36?'var(--red)':battMonths>24?'var(--orange)':'var(--green)';}
+  const items=[{name:'Oil Change',remain:Math.round(oil),unit:'mi',warn:3000},{name:'Valve Lash',remain:Math.round(valve),unit:'mi',warn:10000},{name:'DPF Cleaning',remain:Math.round(dpf),unit:'mi',warn:20000},{name:'Transmission',remain:Math.round(trans),unit:'mi',warn:15000},{name:'Coolant Flush',remain:coolantDays||null,unit:'days',warn:90}].filter(x=>x.remain!==null);
+  $('health-schedule').innerHTML='<table><thead><tr><th>Service</th><th>Remaining</th><th>Status</th></tr></thead><tbody>'+items.map(x=>{const c=x.remain<0?'var(--red)':x.remain<x.warn?'var(--orange)':'var(--green)';const b=x.remain<0?'<span class="badge br">OVERDUE</span>':x.remain<x.warn?'<span class="badge bo">Due Soon</span>':'<span class="badge bg">OK</span>';return `<tr><td style="font-weight:600">${x.name}</td><td style="color:${c};font-weight:700">${x.remain.toLocaleString()} ${x.unit}</td><td>${b}</td></tr>`;}).join('')+'</tbody></table>';
+}
+function showHealthSetup(){document.getElementById('hs-odo').focus();}
+
+// ══════════════════════════════════════════════
+// CASH FLOW
+// ══════════════════════════════════════════════
+function calcCashFlow(){
+  const bank=parseFloat(document.getElementById('cfs-bank').value)||0;
+  const wRev=parseFloat(document.getElementById('cfs-wrev').value)||0;
+  const wTruck=parseFloat(document.getElementById('cfs-truck').value)||1145;
+  const wFuel=parseFloat(document.getElementById('cfs-fuel').value)||1800;
+  const mIns=parseFloat(document.getElementById('cfs-ins').value)||0;
+  const mWarr=parseFloat(document.getElementById('cfs-warr').value)||333;
+  const wOther=parseFloat(document.getElementById('cfs-other').value)||500;
+  const taxPct=(parseFloat(document.getElementById('cfs-tax').value)||25)/100;
+  const wExp=wTruck+wFuel+wOther+(mIns+mWarr)/4.33;
+  const wNet=wRev-wExp;const taxRes=wNet*taxPct;const wNetAT=wNet-taxRes;
+  const rev30=wRev*4.33;const exp30=wExp*4.33;const net30=bank+wNetAT*4.33;
+  $('cf-bank').textContent=fmt(bank);$('cf-rev30').textContent=fmt(rev30);
+  $('cf-net30').textContent=fmt(net30);$('cf-net30').style.color=net30>=0?'var(--green)':'var(--red)';
+  $('cf-forecast').innerHTML=`<div class="os-row"><span>Starting Balance</span><span class="tg">${fmt(bank)}</span></div><div class="os-row"><span>Revenue (30d)</span><span class="tg">+${fmt(rev30)}</span></div><div class="os-row"><span>Truck Payment (30d)</span><span class="tr">-${fmt(wTruck*4.33)}</span></div><div class="os-row"><span>Fuel (30d)</span><span class="tr">-${fmt(wFuel*4.33)}</span></div><div class="os-row"><span>Insurance</span><span class="tr">-${fmt(mIns)}</span></div><div class="os-row"><span>Warranty</span><span class="tr">-${fmt(mWarr)}</span></div><div class="os-row"><span>Other (30d)</span><span class="tr">-${fmt(wOther*4.33)}</span></div><div class="os-row"><span>Tax Reserve</span><span class="tr">-${fmt(taxRes*4.33)}</span></div><div class="os-row tot"><span>NET CASH (30 days)</span><span style="color:${net30>=0?'var(--green)':'var(--red)'};font-size:15px">${fmt(net30)}</span></div><div style="margin-top:12px;padding:10px;background:var(--card2);border-radius:8px"><div style="color:var(--muted);font-size:11px">Weekly tax reserve:</div><div style="font-size:20px;font-weight:700;color:var(--orange)">${fmt(taxRes)}/week</div></div>`;
+  let html='<table><thead><tr><th>Week</th><th>Revenue</th><th>Expenses</th><th>Net</th><th>Running Balance</th></tr></thead><tbody>';let bal=bank;
+  for(let i=1;i<=4;i++){bal+=wNetAT;html+=`<tr><td>Week ${i}</td><td class="tg">+${fmt(wRev)}</td><td class="tr">-${fmt(wExp)}</td><td style="color:${wNet>=0?'var(--green)':'var(--red)'}">${fmt(wNet)}</td><td style="font-weight:700;color:${bal>=0?'var(--accent)':'var(--red)'}">${fmt(bal)}</td></tr>`;}
+  $('cf-timeline').innerHTML=html+'</tbody></table>';
+}
+
+// ══════════════════════════════════════════════
+// SCORECARD
+// ══════════════════════════════════════════════
+function renderScorecard(){
+  const rev=DB.settlements.reduce((a,x)=>a+x.gross,0);const ded=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  const miles=DB.settlements.reduce((a,x)=>a+(x.miles||0),0);
+  const fuel=DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0)+DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0);
+  if(!rev||!miles){$('sc-score').textContent='—';$('sc-grade').textContent='Import PDF to calculate';return;}
+  const rpm=rev/miles,fpm=fuel/miles,npm=(rev-ded)/miles;
+  let score=0;
+  if(rpm>=2.5)score+=25;else if(rpm>=2.0)score+=20;else if(rpm>=1.7)score+=12;else score+=5;
+  if(fpm<=0.5)score+=25;else if(fpm<=0.65)score+=18;else if(fpm<=0.8)score+=10;else score+=3;
+  if(npm>=0.8)score+=25;else if(npm>=0.6)score+=18;else if(npm>=0.4)score+=10;else score+=3;
+  if(miles>0)score+=15;score=Math.min(100,Math.round(score));
+  const grade=score>=90?'Excellent 🏆':score>=75?'Good 👍':score>=60?'Average ⚠️':'Needs Work 🔧';
+  $('sc-score').textContent=score;$('sc-score').style.color=score>=75?'var(--green)':score>=60?'var(--orange)':'var(--red)';
+  $('sc-grade').textContent=grade;
+  $('sc-kpis').innerHTML=`<div class="os-row"><span>Revenue / Mile</span><span style="color:${rpm>=2.0?'var(--green)':'var(--orange)'};font-weight:600">${fmt(rpm)}</span></div><div class="os-row"><span>Fuel Cost / Mile</span><span style="color:${fpm<=0.65?'var(--green)':'var(--red)'};font-weight:600">${fmt(fpm)}</span></div><div class="os-row"><span>Net Profit / Mile</span><span style="color:${npm>=0.6?'var(--green)':'var(--orange)'};font-weight:600">${fmt(npm)}</span></div><div class="os-row"><span>Weeks Tracked</span><span>${DB.settlements.length}</span></div><div class="os-row tot"><span>Fleet Score</span><span style="color:${score>=75?'var(--green)':score>=60?'var(--orange)':'var(--red)'};font-size:16px">${score}/100</span></div>`;
+}
+
+// ══════════════════════════════════════════════
+// LOAN CENTER
+// ══════════════════════════════════════════════
+const DB_loans2=JSON.parse(localStorage.getItem('fleet_loans2')||'[]');
+function renderLoanCenter(){
+  const total=DB_loans2.reduce((a,x)=>a+(x.balance||0),0);
+  const weekly=DB_loans2.filter(x=>x.freq==='Weekly').reduce((a,x)=>a+(x.payment||0),0);
+  const monthly=DB_loans2.filter(x=>x.freq==='Monthly').reduce((a,x)=>a+(x.payment||0),0)+weekly*4.33;
+  $('lc-total').textContent=fmt(total);$('lc-weekly').textContent=fmt(weekly);$('lc-monthly').textContent=fmt(monthly);
+  if(!DB_loans2.length){$('lc-table').innerHTML='<div class="empty">No loans added yet</div>';return;}
+  $('lc-table').innerHTML='<table><thead><tr><th>Name</th><th>Lender</th><th>Original</th><th>Balance</th><th>Payment</th><th>Freq</th><th>APR</th><th>Next Due</th><th></th></tr></thead><tbody>'+DB_loans2.map((x,i)=>`<tr><td style="font-weight:600">${x.name}</td><td class="tm">${x.lender||'—'}</td><td class="tm">${fmt(x.original||0)}</td><td class="tr">${fmt(x.balance)}</td><td>${fmt(x.payment)}</td><td class="tm">${x.freq}</td><td class="tm">${x.apr||0}%</td><td style="color:var(--orange)">${x.due||'—'}</td><td><button onclick="deleteLoan(${i})" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 7px;border-radius:4px;font-size:10px;cursor:pointer">✕</button></td></tr>`).join('')+'</tbody></table>';
+}
+function saveLoan(){const loan={name:$('ln-name').value,lender:$('ln-lender').value,original:parseFloat($('ln-orig').value)||0,balance:parseFloat($('ln-bal').value)||0,payment:parseFloat($('ln-pay').value)||0,freq:$('ln-freq').value,apr:parseFloat($('ln-rate').value)||0,due:$('ln-due').value};if(!loan.name)return alert('Enter loan name');DB_loans2.push(loan);localStorage.setItem('fleet_loans2',JSON.stringify(DB_loans2));['ln-name','ln-lender','ln-orig','ln-bal','ln-pay','ln-rate','ln-due'].forEach(id=>$(id).value='');renderLoanCenter();}
+function deleteLoan(i){DB_loans2.splice(i,1);localStorage.setItem('fleet_loans2',JSON.stringify(DB_loans2));renderLoanCenter();}
+function addLoan(){$('ln-name').focus();}
+
+// ══════════════════════════════════════════════
+// CREDIT CARDS
+// ══════════════════════════════════════════════
+const DB_cards=JSON.parse(localStorage.getItem('fleet_cards')||'[]');
+const DB_cardPurchases=JSON.parse(localStorage.getItem('fleet_cardpurchases')||'[]');
+function renderCards(){
+  const total=DB_cards.reduce((a,x)=>a+(x.balance||0),0);const limit=DB_cards.reduce((a,x)=>a+(x.limit||0),0);const minpay=DB_cards.reduce((a,x)=>a+(x.minpay||0),0);
+  $('cc-total').textContent=fmt(total);$('cc-limit').textContent=fmt(limit);$('cc-util').textContent=limit?((total/limit)*100).toFixed(1)+'%':'—';$('cc-util').style.color=(total/limit)>0.3?'var(--orange)':'var(--green)';$('cc-minpay').textContent=fmt(minpay);
+  if(!DB_cards.length){$('cc-table').innerHTML='<div class="empty">No cards added yet</div>';return;}
+  $('cc-table').innerHTML='<table><thead><tr><th>Card</th><th>Type</th><th>Balance</th><th>Limit</th><th>Util%</th><th>APR</th><th>Min Pay</th><th>Due Day</th><th>Used For</th><th></th></tr></thead><tbody>'+DB_cards.map((x,i)=>{const u=x.limit?((x.balance/x.limit)*100).toFixed(0):0;return `<tr><td style="font-weight:600">${x.name}</td><td class="tm">${x.type}</td><td class="tr">${fmt(x.balance)}</td><td class="tm">${fmt(x.limit)}</td><td style="color:${u>30?'var(--orange)':'var(--green)'}">${u}%</td><td class="tm">${x.apr||0}%</td><td>${fmt(x.minpay)}</td><td class="tm">${x.dueday||'—'}</td><td class="tm" style="font-size:11px">${x.usedFor||'—'}</td><td><button onclick="deleteCard(${i})" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 7px;border-radius:4px;font-size:10px;cursor:pointer">✕</button></td></tr>`;}).join('')+'</tbody></table>';
+  if(DB_cardPurchases.length)$('cc-purchases').innerHTML='<table><thead><tr><th>Date</th><th>Item</th><th>Card</th><th>Amount</th><th>Deductible</th></tr></thead><tbody>'+DB_cardPurchases.map(p=>`<tr><td>${p.date||'—'}</td><td>${p.item}</td><td class="tm">${p.card}</td><td class="tr">${fmt(p.amount)}</td><td>${p.deduct?'<span class="badge bg">Yes</span>':'<span class="badge br">No</span>'}</td></tr>`).join('')+'</tbody></table>';
+}
+function saveCard(){const card={name:$('cc-name').value,type:$('cc-type').value,balance:parseFloat($('cc-bal').value)||0,limit:parseFloat($('cc-lim').value)||0,apr:parseFloat($('cc-apr').value)||0,minpay:parseFloat($('cc-minp').value)||0,dueday:$('cc-dueday').value,usedFor:$('cc-use').value};if(!card.name)return alert('Enter card name');DB_cards.push(card);localStorage.setItem('fleet_cards',JSON.stringify(DB_cards));['cc-name','cc-bal','cc-lim','cc-apr','cc-minp','cc-dueday','cc-use'].forEach(id=>$(id).value='');renderCards();}
+function deleteCard(i){DB_cards.splice(i,1);localStorage.setItem('fleet_cards',JSON.stringify(DB_cards));renderCards();}
+function addCard(){$('cc-name').focus();}
+function addCardPurchase(){const item=prompt('Item purchased:');if(!item)return;const amount=parseFloat(prompt('Amount ($):')||0);const card=prompt('Which card?');const deduct=confirm('Tax deductible?');DB_cardPurchases.push({item,amount,card,deduct,date:new Date().toISOString().split('T')[0]});localStorage.setItem('fleet_cardpurchases',JSON.stringify(DB_cardPurchases));renderCards();}
+
+// ══════════════════════════════════════════════
+// DOCUMENT VAULT
+// ══════════════════════════════════════════════
+const DB_vault=JSON.parse(localStorage.getItem('fleet_vault')||'[]');
+let vaultFilter='all';
+function filterVault(cat){vaultFilter=cat;document.querySelectorAll('[id^="vf-"]').forEach(b=>{b.style.background='var(--card2)';b.style.color='var(--muted)';});const btn=$('vf-'+cat);if(btn){btn.style.background='var(--accent)';btn.style.color='#fff';}renderVault();}
+function renderVault(){
+  const search=($('vlt-search')?.value||'').toLowerCase();
+  let docs=DB_vault;
+  if(vaultFilter!=='all')docs=docs.filter(x=>x.cat===vaultFilter);
+  if(search)docs=docs.filter(x=>(x.name||'').toLowerCase().includes(search)||(x.notes||'').toLowerCase().includes(search));
+  $('vlt-count').textContent=DB_vault.length;$('vlt-updated').textContent=DB_vault.length?new Date(Math.max(...DB_vault.map(x=>new Date(x.savedAt||0)))).toLocaleDateString():'—';
+  if(!docs.length){$('vlt-list').innerHTML='<div class="empty">No documents found</div>';return;}
+  const cc={amazon:'bo',prime:'bb',tax:'br',warranty:'bg',truck:'bp',personal:'tm'};
+  $('vlt-list').innerHTML='<table><thead><tr><th>Name</th><th>Category</th><th>Date</th><th>Amount</th><th>Tax Ded.</th><th>Notes</th><th></th></tr></thead><tbody>'+docs.map((x,i)=>`<tr><td style="font-weight:600">${x.name}</td><td><span class="badge ${cc[x.cat]||'bb'}">${x.cat}</span></td><td>${x.date||'—'}</td><td>${x.amount?fmt(x.amount):'—'}</td><td>${x.taxDed==='yes'?'<span class="badge bg">Yes</span>':x.taxDed==='partial'?'<span class="badge bo">Partial</span>':'<span class="badge br">No</span>'}</td><td class="tm" style="font-size:11px">${x.notes||'—'}</td><td><button onclick="deleteVault(${DB_vault.indexOf(x)})" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 7px;border-radius:4px;font-size:10px;cursor:pointer">✕</button></td></tr>`).join('')+'</tbody></table>';
+}
+function saveVaultDoc(){const doc={name:$('vd-name').value,cat:$('vd-cat').value,date:$('vd-date').value,amount:parseFloat($('vd-amt').value)||0,taxDed:$('vd-tax').value,notes:$('vd-notes').value,savedAt:new Date().toISOString()};if(!doc.name)return alert('Enter document name');DB_vault.push(doc);localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));['vd-name','vd-date','vd-amt','vd-notes'].forEach(id=>$(id).value='');renderVault();}
+function deleteVault(i){DB_vault.splice(i,1);localStorage.setItem('fleet_vault',JSON.stringify(DB_vault));renderVault();}
+function addVaultDoc(){$('vd-name').focus();}
+
+// ══════════════════════════════════════════════
+// ASSET REGISTER
+// ══════════════════════════════════════════════
+const DB_assets2=JSON.parse(localStorage.getItem('fleet_assets2')||'[]');
+function renderAssetReg(){
+  const total=DB_assets2.reduce((a,x)=>a+(x.cost||0),0);const deduct=DB_assets2.reduce((a,x)=>a+(x.cost||0)*((x.bizPct||100)/100),0);
+  $('ar-count').textContent=DB_assets2.length;$('ar-value').textContent=fmt(total);$('ar-deduct').textContent=fmt(deduct);
+  if(!DB_assets2.length){$('ar-table').innerHTML='<div class="empty">No assets yet</div>';return;}
+  $('ar-table').innerHTML='<table><thead><tr><th>Asset</th><th>Category</th><th>Date</th><th>Cost</th><th>Biz%</th><th>Deductible</th><th>Source</th><th>Warranty</th><th></th></tr></thead><tbody>'+DB_assets2.map((x,i)=>{const we=x.warranty&&new Date(x.warranty)<Date.now();return `<tr><td style="font-weight:600">${x.name}</td><td class="tm">${x.cat}</td><td>${x.date||'—'}</td><td class="tg">${fmt(x.cost)}</td><td>${x.bizPct||100}%</td><td class="tg">${fmt((x.cost||0)*((x.bizPct||100)/100))}</td><td class="tm">${x.from||'—'}</td><td style="color:${we?'var(--red)':'var(--green)'}">${x.warranty||'—'}</td><td><button onclick="deleteAsset(${i})" style="background:none;border:1px solid var(--red);color:var(--red);padding:2px 7px;border-radius:4px;font-size:10px;cursor:pointer">✕</button></td></tr>`;}).join('')+'</tbody></table>';
+}
+function saveAsset(){const asset={name:$('as-name').value,cat:$('as-cat').value,date:$('as-date').value,cost:parseFloat($('as-cost').value)||0,from:$('as-from').value,bizPct:parseFloat($('as-biz').value)||100,warranty:$('as-warr').value,notes:$('as-notes').value};if(!asset.name)return alert('Enter asset name');DB_assets2.push(asset);localStorage.setItem('fleet_assets2',JSON.stringify(DB_assets2));['as-name','as-date','as-cost','as-from','as-biz','as-warr','as-notes'].forEach(id=>$(id).value='');renderAssetReg();}
+function deleteAsset(i){DB_assets2.splice(i,1);localStorage.setItem('fleet_assets2',JSON.stringify(DB_assets2));renderAssetReg();}
+function addAsset(){$('as-name').focus();}
+
+// ══════════════════════════════════════════════
+// ACCOUNTANT PACKAGE
+// ══════════════════════════════════════════════
+function renderAccountant(){
+  const rev=DB.settlements.reduce((a,x)=>a+x.gross,0);const ded=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);const net=rev-ded;
+  $('ap-rev').textContent=fmt(rev);$('ap-ded').textContent=fmt(ded);$('ap-net').textContent=fmt(net);$('ap-net').style.color=net>=0?'var(--green)':'var(--red)';$('ap-scount').textContent=DB.settlements.length;
+  $('ap-loans').innerHTML=DB_loans2.length?DB_loans2.map(x=>`<div class="os-row"><span>${x.name}</span><span class="tr">${fmt(x.balance)}</span></div>`).join(''):'<div class="tm" style="font-size:11px">No loans</div>';
+  $('ap-cards').innerHTML=DB_cards.length?DB_cards.map(x=>`<div class="os-row"><span>${x.name}</span><span class="tr">${fmt(x.balance)}</span></div>`).join(''):'<div class="tm" style="font-size:11px">No cards</div>';
+  const at=DB_assets2.reduce((a,x)=>a+(x.cost||0)*((x.bizPct||100)/100),0);
+  $('ap-assets').innerHTML=DB_assets2.length?`<div class="os-row"><span>${DB_assets2.length} assets</span><span class="tg">${fmt(at)} deductible</span></div>`:'<div class="tm" style="font-size:11px">No assets</div>';
+  const fuel=DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0)+DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0);
+  $('ap-fuel').innerHTML=`<div class="os-row"><span>Net Fuel</span><span class="tr">${fmt(fuel)}</span></div>`;
+  const maint=DB.maintenance.reduce((a,x)=>a+(x.total||0),0);
+  $('ap-maint').innerHTML=`<div class="os-row"><span>Repairs</span><span class="tr">${fmt(maint)}</span></div><div class="os-row"><span>Warranty</span><span class="tg">${fmt(DB.maintenance.reduce((a,x)=>a+(x.covered||0),0))}</span></div>`;
+}
+function generatePackage(){
+  const rev=DB.settlements.reduce((a,x)=>a+x.gross,0);const ded=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);
+  const fuel=DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0)+DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0);
+  const maint=DB.maintenance.reduce((a,x)=>a+(x.total||0),0);
+  const at=DB_assets2.reduce((a,x)=>a+(x.cost||0)*((x.bizPct||100)/100),0);
+  const cp=DB_cardPurchases.filter(x=>x.deduct).reduce((a,x)=>a+(x.amount||0),0);
+  const pkg={generated:new Date().toISOString(),company:'Graywolf Logistics LLC / Graywolf Logistics',owner:'Ali Bozkurt',year:2026,income:{grossRevenue:rev,deductions:ded,netIncome:rev-ded,settlements:DB.settlements.length},expenses:{fuel,maintenance:maint,totalDeductions:ded},assets:{list:DB_assets2,totalDeductible:at},loans:{business:DB_loans2,cards:DB_cards},personalCardPurchases:{total:cp,items:DB_cardPurchases.filter(x=>x.deduct)},vault:{documents:DB_vault.length},rawData:DB};
+  const blob=new Blob([JSON.stringify(pkg,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='graywolf-logistics-2026-accountant-'+new Date().toISOString().split('T')[0]+'.json';a.click();URL.revokeObjectURL(url);
+  alert('✅ Accountant package generated!\n\nIncludes: P&L · Deductions · Assets (Sec 179) · Loans · Cards · Maintenance · Fuel');
+}
+
+// ══════════════════════════════════════════════
+// AI ADVISOR
+// ══════════════════════════════════════════════
+function buildContext(){
+  const rev=DB.settlements.reduce((a,x)=>a+x.gross,0);const ded=DB.deductions.reduce((a,x)=>a+(x.amount||0),0);const miles=DB.settlements.reduce((a,x)=>a+(x.miles||0),0);
+  const fuel=DB.fuel.tractor.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0)+DB.fuel.reefer.reduce((a,x)=>a+(x.amount||0)-(x.discount||0),0);
+  const loans=DB_loans2.reduce((a,x)=>a+(x.balance||0),0);const cards=DB_cards.reduce((a,x)=>a+(x.balance||0),0);
+  const last=DB.settlements[DB.settlements.length-1];
+  return `You are the AI business advisor for Ali Bozkurt, owner-operator of Graywolf Logistics LLC / Graywolf Logistics LLC. He drives Unit 634033 (2023 Freightliner Cascadia) under Prime Inc. carrier. Single truck operation, Springfield MO area.
+
+CURRENT FINANCIAL DATA:
+- Tracked Revenue: $${rev.toFixed(2)} | Deductions: $${ded.toFixed(2)} | Net: $${(rev-ded).toFixed(2)}
+- Total Miles: ${miles.toLocaleString()} | Rev/Mile: $${miles?(rev/miles).toFixed(3):'N/A'}
+- Net Fuel Cost: $${fuel.toFixed(2)} | Fuel/Mile: $${miles?(fuel/miles).toFixed(3):'N/A'}
+- Business Loan Debt: $${loans.toFixed(2)} | Credit Cards: $${cards.toFixed(2)}
+- Settlements: ${DB.settlements.length} | Assets Logged: ${DB_assets2.length}
+${last?`- Last Paycheck: Week ${last.weekEnding}, Gross $${last.gross}, Net $${last.net}`:'- No settlements yet'}
+
+Fuel note: Fuel (DEF, tractor, reefer) shows as deductions on Prime paycheck. Give specific, actionable trucking business advice. Be direct. Max 180 words.`;
+}
+const aiHistory=[];
+async function sendAI(){
+  const input=$('ai-input');const q=input.value.trim();if(!q)return;input.value='';
+  const msgs=$('ai-messages');
+  msgs.innerHTML+=`<div style="margin-bottom:10px"><strong style="color:var(--accent)">You:</strong> ${q}</div>`;
+  msgs.innerHTML+=`<div id="ai-typing" style="color:var(--muted);font-style:italic;margin-bottom:10px">🤖 Thinking...</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  aiHistory.push({role:'user',content:q});
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:500,system:buildContext(),messages:aiHistory.slice(-6)})});
+    const data=await resp.json();
+    const answer=data.content?data.content.map(i=>i.text||'').join(''):'Could not get response.';
+    aiHistory.push({role:'assistant',content:answer});
+    $('ai-typing').remove();
+    msgs.innerHTML+=`<div style="margin-bottom:14px;padding:10px;background:var(--card2);border-radius:8px"><strong style="color:var(--green)">🤖 AI Advisor:</strong><br>${answer.replace(/\n/g,'<br>')}</div>`;
+    msgs.scrollTop=msgs.scrollHeight;
+  }catch(err){$('ai-typing').remove();msgs.innerHTML+=`<div style="color:var(--red)">Error: ${err.message}</div>`;}
+}
+function aiQuick(q){$('ai-input').value=q;sendAI();}
+
+// ══════════════════════════════════════════════
+// SP HOOK FOR NEW PAGES
+// ══════════════════════════════════════════════
+const _origSp=sp;
+window.sp=function(id,el){
+  _origSp(id,el);
+  if(id==='health'){const h=JSON.parse(localStorage.getItem('fleet_health')||'{}');if(h.odo)renderHealth(h);}
+  if(id==='scorecard')renderScorecard();
+  if(id==='loanCenter')renderLoanCenter();
+  if(id==='cards')renderCards();
+  if(id==='vault')renderVault();
+  if(id==='assetreg')renderAssetReg();
+  if(id==='accountant')renderAccountant();
+  if(id==='reports')setTimeout(renderYTDChart,150);
+};
+
+window.addEventListener('load',()=>{
+  renderDashboard();
+  setTimeout(renderProfitChart,200);
+  // Restore topbar date from last settlement
+  if(DB.settlements.length){const last=DB.settlements[DB.settlements.length-1];if(last.weekEnding||last.date)$('btn-week').textContent='📅 Week '+(last.weekEnding||last.date);}
+});
+</script>
+</body>
+</html>
